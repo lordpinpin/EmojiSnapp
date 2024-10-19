@@ -1,0 +1,31 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Background of the ProgressBar (Violet) -->
+    <item android:id="@android:id/background">
+        <shape android:shape="rectangle">
+            <corners android:radius="12dp"/> <!-- Rounded corners -->
+            <solid android:color="#8A2BE2" /> <!-- Violet background color -->
+        </shape>
+    </item>
+
+    <!-- Progress color (Yellow) -->
+    <item android:id="@android:id/progress">
+        <clip>
+            <shape android:shape="rectangle">
+                <corners android:radius="12dp"/> <!-- Rounded corners -->
+                <solid android:color="#FFD700" /> <!-- Yellow progress color -->
+            </shape>
+        </clip>
+    </item>
+
+    <!-- Optional: Secondary Progress color -->
+    <item android:id="@android:id/secondaryProgress">
+        <clip>
+            <shape android:shape="rectangle">
+                <corners android:radius="12dp"/> <!-- Rounded corners -->
+                <solid android:color="#FFFFE0"/> <!-- Light yellow secondary progress color -->
+            </shape>
+        </clip>
+    </item>
+
+</layer-list>

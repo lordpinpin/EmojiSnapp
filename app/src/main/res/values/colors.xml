@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="emojiyellow">#FFE9BD0D</color>
+    <color name="emojiorange">#FFE68905</color>
+    <color name="emojired">#FFD00303</color>
+    <color name="emojipink">#FFDB0755</color>
+    <color name="emojiviolet">#FF630A89</color>
+    <color name="emojigreen">#FF4CAF50</color>
+
+</resources>
