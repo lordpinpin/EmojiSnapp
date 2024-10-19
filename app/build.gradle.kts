@@ -66,6 +66,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.emoji2.bundled)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -73,9 +74,10 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-    val emoji2_version = "1.5.0"
+    implementation(libs.androidx.emoji2)
+    implementation(libs.androidx.emoji2.bundled)
+    implementation(libs.androidx.emoji2.views)
+    implementation(libs.androidx.emoji2.views.helper)
+    implementation(libs.androidx.startup.runtime)
 
-    implementation("androidx.emoji2:emoji2:$emoji2_version")
-    implementation("androidx.emoji2:emoji2-views:$emoji2_version")
-    implementation("androidx.emoji2:emoji2-views-helper:$emoji2_version")
 }

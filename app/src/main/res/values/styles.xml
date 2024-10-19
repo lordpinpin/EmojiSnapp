@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="TransparentAlertDialog" parent="Theme.AppCompat.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item> <!-- Transparent background -->
+        <item name="android:windowFrame">@null</item> <!-- Remove default frame -->
+        <item name="android:windowIsFloating">true</item> <!-- Ensures the dialog is floating -->
+        <item name="android:windowIsTranslucent">true</item> <!-- Make the dialog translucent -->
+        <item name="android:windowNoTitle">true</item> <!-- Remove title area -->
+        <item name="android:backgroundDimEnabled">false</item> <!-- Disable background dimming -->
+    </style>
+</resources>

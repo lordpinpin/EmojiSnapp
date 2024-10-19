@@ -1,5 +1,7 @@
 package com.mobdeve.s12.pinpin.lord.emojisnapp
 
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -26,8 +28,14 @@ class TrackActivity : AppCompatActivity() {
         val progress = intent.getIntExtra("CUR_LEVEL", 17);
 
         binding.recyclerView.layoutManager = layoutManager
-        binding.recyclerView.adapter = TrackAdapter(emojiList, progress)
+        binding.recyclerView.adapter = TrackAdapter(emojiList, progress, this)
         binding.recyclerView.scrollToPosition(0)
+
+        // Makes B&W
+        val colorMatrix = ColorMatrix()
+        colorMatrix.setSaturation(0f)
+        val colorFilter = ColorMatrixColorFilter(colorMatrix)
+        binding.backBtn.paint.colorFilter = colorFilter
 
         binding.backBtn.setOnClickListener {
             finish() // Ends the current activity

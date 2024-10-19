@@ -13,6 +13,18 @@
         android:theme="@style/Theme.EmojiSnapp"
         tools:targetApi="31">
         <activity
+            android:name=".HistoryActivity"
+            android:exported="false"
+            android:theme="@style/Theme.EmojiSnapp" />
+        <activity
+            android:name=".RegisterActivity"
+            android:exported="false"
+            android:theme="@style/Theme.EmojiSnapp" />
+        <activity
+            android:name=".DeckActivity"
+            android:exported="false"
+            android:theme="@style/Theme.EmojiSnapp" />
+        <activity
             android:name=".TrackActivity"
             android:exported="false"
             android:label="@string/title_activity_track"

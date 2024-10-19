@@ -27,9 +27,20 @@ class MenuActivity : AppCompatActivity() {
             binding.welcomeTx.text = "Welcome, Guest! \uD83D\uDE0A"
         }
 
+        binding.editBtn.setOnClickListener {
+            val intent = Intent(this, DeckActivity::class.java)
+            intent.putExtra("CUR_LEVEL", 17)
+            startActivity(intent)
+        }
+
         binding.trackBtn.setOnClickListener {
             val intent = Intent(this, TrackActivity::class.java)
             intent.putExtra("CUR_LEVEL", 17)
+            startActivity(intent)
+        }
+
+        binding.historyBtn.setOnClickListener {
+            val intent = Intent(this, HistoryActivity::class.java)
             startActivity(intent)
         }
 

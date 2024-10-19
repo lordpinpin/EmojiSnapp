@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="320dp"
+        android:layout_height="320dp"
+        android:background="@drawable/emojibox"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/detailEmojiIconTx"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="90dp"
+            android:fontFamily="@font/noto_color_emoji_compat"
+            android:text="🌟"
+            android:textSize="39sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.49"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/detailEmojiCostTx"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/bagel_fat_one"
+            android:text="44"
+            android:textColor="@color/emojipink"
+            android:textSize="20sp"
+            app:layout_constraintEnd_toEndOf="@+id/detailCostTx"
+            app:layout_constraintStart_toStartOf="@+id/detailCostTx"
+            app:layout_constraintTop_toBottomOf="@+id/detailCostTx" />
+
+        <TextView
+            android:id="@+id/detailEmojiPowerTx"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/bagel_fat_one"
+            android:text="44"
+            android:textColor="@color/emojiyellow"
+            android:textSize="20sp"
+            app:layout_constraintEnd_toEndOf="@+id/detailPowerTx"
+            app:layout_constraintStart_toStartOf="@+id/detailPowerTx"
+            app:layout_constraintTop_toBottomOf="@+id/detailPowerTx" />
+
+        <TextView
+            android:id="@+id/detailCostTx"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="100dp"
+            android:layout_marginEnd="4dp"
+            android:fontFamily="@font/bagel_fat_one"
+            android:text="Cost"
+            android:textColor="@color/emojipink"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toStartOf="@+id/detailEmojiIconTx"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/detailPowerTx"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="2dp"
+            android:layout_marginTop="100dp"
+            android:fontFamily="@font/bagel_fat_one"
+            android:text="Power"
+            android:textColor="@color/emojiyellow"
+            android:textSize="12sp"
+            app:layout_constraintStart_toEndOf="@+id/detailEmojiIconTx"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.mobdeve.s12.pinpin.lord.emojisnapp.SemiCircleTextView
+            android:id="@+id/detailEmojiDescTx"
+            android:layout_width="175dp"
+            android:layout_height="90dp"
+            android:layout_marginTop="40dp"
+            android:fontFamily="@font/allerta"
+            android:lineSpacingExtra="-3sp"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/detailEmojiIconTx" />
+
+        <TextView
+            android:id="@+id/detailEmojiNameTx"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/allerta"
+            android:text="Sparkles"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toTopOf="@+id/detailEmojiDescTx"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/detailEmojiIconTx" />
+
+        <Button
+            android:id="@+id/addBtn"
+            android:layout_width="80dp"
+            android:layout_height="35dp"
+            android:layout_marginBottom="15dp"
+            android:backgroundTint="@color/emojigreen"
+            android:fontFamily="@font/allerta"
+            android:paddingLeft="12dp"
+            android:paddingTop="2dp"
+            android:paddingRight="12dp"
+            android:paddingBottom="2dp"
+            android:text="Add"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            app:cornerRadius="5dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/modifyBtn"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <Button
+            android:id="@+id/modifyBtn"
+            android:layout_width="80dp"
+            android:layout_height="35dp"
+            android:layout_marginBottom="15dp"
+            android:backgroundTint="@color/emojiyellow"
+            android:fontFamily="@font/allerta"
+            android:paddingLeft="12dp"
+            android:paddingTop="2dp"
+            android:paddingRight="12dp"
+            android:paddingBottom="2dp"
+            android:text="Modify"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            app:cornerRadius="5dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <Button
+            android:id="@+id/removeBtn"
+            android:layout_width="80dp"
+            android:layout_height="35dp"
+            android:layout_marginBottom="15dp"
+            android:backgroundTint="@color/emojired"
+            android:fontFamily="@font/allerta"
+            android:paddingLeft="12dp"
+            android:paddingTop="2dp"
+            android:paddingRight="12dp"
+            android:paddingBottom="2dp"
+            android:text="Remove"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            app:cornerRadius="5dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/modifyBtn" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

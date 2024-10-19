@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="60sp"
+    android:layout_height="60sp">
+
+    <TextView
+        android:id="@+id/deckEmojiIconTx"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:fontFamily="@font/noto_color_emoji_compat"
+        android:text="😀"
+        android:textAlignment="center"
+        android:textSize="22sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/deckEmojiCostTx"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:fontFamily="@font/bagel_fat_one"
+        android:text="4"
+        android:textColor="@color/emojipink"
+        android:textSize="11sp"
+        app:layout_constraintEnd_toStartOf="@+id/deckEmojiIconTx"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/deckEmojiPowerTx"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:fontFamily="@font/bagel_fat_one"
+        android:text="24"
+        android:textColor="@color/emojiyellow"
+        android:textSize="11sp"
+        app:layout_constraintStart_toEndOf="@+id/deckEmojiIconTx"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/deckEmojiNameTx"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/allerta"
+        android:lineSpacingExtra="-4sp"
+        android:text="Smiling Face"
+        android:textAlignment="center"
+        android:textSize="10sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/deckEmojiIconTx" />
+</androidx.constraintlayout.widget.ConstraintLayout>

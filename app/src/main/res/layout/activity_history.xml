@@ -2,52 +2,45 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".TrackActivity">
+    android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/trackTx"
+        android:id="@+id/historyHeaderTx"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="#FFE2E2"
+        android:background="#F7E2FF"
         android:fontFamily="@font/bagel_fat_one"
         android:lineSpacingExtra="-28sp"
         android:paddingTop="10sp"
         android:paddingBottom="10sp"
-        android:text="COLLECTION\nTRACK"
+        android:text="MATCH\nHISTORY"
         android:textAlignment="center"
-        android:textColor="#E91E63"
+        android:textColor="@color/emojiviolet"
         android:textSize="48sp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerView"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:clipToPadding="false"
-        android:paddingTop="50sp"
-        android:paddingBottom="50sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/trackTx">
-
-    </androidx.recyclerview.widget.RecyclerView>
-
     <TextView
-        android:id="@+id/backBtn"
+        android:id="@+id/historyBackBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="10dp"
         android:fontFamily="@font/noto_color_emoji_compat"
         android:text="🔙"
         android:textSize="30sp"
-        app:layout_constraintBottom_toBottomOf="@+id/trackTx"
+        app:layout_constraintBottom_toBottomOf="@+id/historyHeaderTx"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerMatch"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/historyHeaderTx" />
 </androidx.constraintlayout.widget.ConstraintLayout>
