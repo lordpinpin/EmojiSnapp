@@ -13,6 +13,7 @@ import androidx.emoji2.bundled.BundledEmojiCompatConfig
 import androidx.emoji2.text.EmojiCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.mobdeve.s12.pinpin.lord.emojisnapp.EmojiType
 import com.mobdeve.s12.pinpin.lord.emojisnapp.databinding.ActivityDeckBinding
 import com.mobdeve.s12.pinpin.lord.emojisnapp.databinding.ActivityMenuBinding
 import com.mobdeve.s12.pinpin.lord.emojisnapp.databinding.ActivityTrackBinding
@@ -28,6 +29,7 @@ class DeckActivity : AppCompatActivity() {
         binding = ActivityDeckBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Deck Title
         binding.deckTitleTx.visibility = View.VISIBLE
         binding.deckTitleEt.visibility = View.GONE
 
@@ -57,7 +59,7 @@ class DeckActivity : AppCompatActivity() {
         deckData.forEach { it.sort() }
 
         var deckEmojiAdapter = DeckEmojiAdapter(deckData[0].getEmojis()) { emoji ->
-            showEmojiDetailsPopup(emoji, "DECK_EMOJI")
+            showEmojiDetailsPopup(emoji, EmojiType.DECK_EMOJI)
         }
         binding.recyclerDeckEmoji.layoutManager = GridLayoutManager(this, 6)
         binding.recyclerDeckEmoji.adapter = deckEmojiAdapter
@@ -72,11 +74,13 @@ class DeckActivity : AppCompatActivity() {
         binding.recyclerDecks.adapter = deckBackAdapter
 
         binding.recyclerEmojiList.layoutManager = GridLayoutManager(this, 4)
+
+
         // TODO: Replace getAllUniqueEmojis with currentUnlockedEmojis
         val allEmojis = DataGenerator.getAllUniqueEmojis()
         allEmojis.sortWith(compareBy({ it.cost }, { it.power }))
         binding.recyclerEmojiList.adapter = EmojiListAdapter(allEmojis) { emoji ->
-            showEmojiDetailsPopup(emoji, "EMOJI_LIST")
+            showEmojiDetailsPopup(emoji, EmojiType.LIST_EMOJI)
         }
 
 
@@ -93,14 +97,14 @@ class DeckActivity : AppCompatActivity() {
 
     private fun updateEmojiRecycler(deck: Deck) {
         var deckEmojiAdapter = DeckEmojiAdapter(deck.getEmojis()) { emoji ->
-            showEmojiDetailsPopup(emoji, "DECK_EMOJI")
+            showEmojiDetailsPopup(emoji, EmojiType.DECK_EMOJI)
         }
         binding.recyclerDeckEmoji.adapter = deckEmojiAdapter
         binding.deckTitleTx.text = deck.getTitle()
         deckEmojiAdapter.notifyItemRangeChanged(0, deck.getEmojis().size)
     }
-    // TODO: Make type into Enum
-    private fun showEmojiDetailsPopup(emoji: Emoji, type: String) {
+
+    private fun showEmojiDetailsPopup(emoji: Emoji, type: EmojiType) {
 
         val binding = DialogEmojiDetailsBinding.inflate(layoutInflater)
         binding.detailEmojiIconTx.text = emoji.icon
@@ -109,7 +113,7 @@ class DeckActivity : AppCompatActivity() {
         binding.detailEmojiNameTx.text = emoji.name
         binding.detailEmojiDescTx.setText(emoji.description)
 
-        if(type === "DECK_EMOJI") {
+        if(type === EmojiType.DECK_EMOJI) {
             binding.addBtn.visibility = View.GONE
         } else {
             binding.removeBtn.visibility = View.GONE
