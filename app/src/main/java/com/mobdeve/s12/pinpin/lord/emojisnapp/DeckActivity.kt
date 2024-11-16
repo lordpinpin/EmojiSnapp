@@ -76,10 +76,9 @@ class DeckActivity : AppCompatActivity() {
         binding.recyclerEmojiList.layoutManager = GridLayoutManager(this, 4)
 
 
-        // TODO: Replace getAllUniqueEmojis with currentUnlockedEmojis
-        val allEmojis = DataGenerator.getAllUniqueEmojis()
-        allEmojis.sortWith(compareBy({ it.cost }, { it.power }))
-        binding.recyclerEmojiList.adapter = EmojiListAdapter(allEmojis) { emoji ->
+        val allEmojis = EmojiFactory.getEmojisSortedByName()
+        val sortedEmojis = allEmojis.sortedWith(compareBy({ it.baseCost }, { it.basePower }))
+        binding.recyclerEmojiList.adapter = EmojiListAdapter(sortedEmojis) { emoji ->
             showEmojiDetailsPopup(emoji, EmojiType.LIST_EMOJI)
         }
 
@@ -88,7 +87,7 @@ class DeckActivity : AppCompatActivity() {
             updateEmojiRecycler(Deck("Empty Deck", arrayListOf<Emoji>()))
         }
 
-        val progress = intent.getIntExtra("CUR_LEVEL", 17);
+        val progress = intent.getIntExtra("CUR_LEVEL", 28);
 
         binding.deckBackBtn.setOnClickListener {
             finish()
@@ -108,8 +107,8 @@ class DeckActivity : AppCompatActivity() {
 
         val binding = DialogEmojiDetailsBinding.inflate(layoutInflater)
         binding.detailEmojiIconTx.text = emoji.icon
-        binding.detailEmojiCostTx.text = "${emoji.cost}"
-        binding.detailEmojiPowerTx.text = "${emoji.power}"
+        binding.detailEmojiCostTx.text = "${emoji.baseCost}"
+        binding.detailEmojiPowerTx.text = "${emoji.basePower}"
         binding.detailEmojiNameTx.text = emoji.name
         binding.detailEmojiDescTx.setText(emoji.description)
 

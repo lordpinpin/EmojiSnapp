@@ -65,8 +65,8 @@ class TrackAdapter(
         fun bind(emoji: Emoji, progress: Int, req: Int) {
             binding.leftEmojiTx.text = emoji.icon
             binding.leftNameTx.text = emoji.name
-            binding.leftCostTx.text = emoji.cost.toString()
-            binding.leftPowerTx.text = emoji.power.toString()
+            binding.leftCostTx.text = emoji.baseCost.toString()
+            binding.leftPowerTx.text = emoji.basePower.toString()
             binding.leftPb.progress = progress;
             binding.leftReqTx.text = req.toString()
 
@@ -103,8 +103,8 @@ class TrackAdapter(
 
             // Set emoji details
             binding.detailEmojiIconTx.text = emoji.icon
-            binding.detailEmojiCostTx.text = "${emoji.cost}"
-            binding.detailEmojiPowerTx.text = "${emoji.power}"
+            binding.detailEmojiCostTx.text = "${emoji.baseCost}"
+            binding.detailEmojiPowerTx.text = "${emoji.basePower}"
             binding.detailEmojiNameTx.text = emoji.name
             binding.detailEmojiDescTx.setText(emoji.description)
 
@@ -125,8 +125,8 @@ class TrackAdapter(
         fun bind(emoji: Emoji, progress: Int, req: Int) {
             binding.rightEmojiTx.text = emoji.icon
             binding.rightNameTx.text = emoji.name
-            binding.rightCostTx.text = emoji.cost.toString()
-            binding.rightPowerTx.text = emoji.power.toString()
+            binding.rightCostTx.text = emoji.baseCost.toString()
+            binding.rightPowerTx.text = emoji.basePower.toString()
             binding.rightPb.progress = progress;
             binding.rightReqTx.text = req.toString()
 
@@ -163,8 +163,8 @@ class TrackAdapter(
 
             // Set emoji details
             binding.detailEmojiIconTx.text = emoji.icon
-            binding.detailEmojiCostTx.text = "${emoji.cost}"
-            binding.detailEmojiPowerTx.text = "${emoji.power}"
+            binding.detailEmojiCostTx.text = "${emoji.baseCost}"
+            binding.detailEmojiPowerTx.text = "${emoji.basePower}"
             binding.detailEmojiNameTx.text = emoji.name
             binding.detailEmojiDescTx.setText(emoji.description)
 

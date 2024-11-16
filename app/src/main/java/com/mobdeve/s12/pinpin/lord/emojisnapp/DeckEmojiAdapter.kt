@@ -10,8 +10,8 @@ class DeckEmojiAdapter (private val emojiList: List<Emoji>, private val onEmojiC
     inner class EmojiViewHolder(val binding: DeckEmojiBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(emoji: Emoji) {
             binding.deckEmojiIconTx.text = emoji.icon
-            binding.deckEmojiCostTx.text = emoji.cost.toString()
-            binding.deckEmojiPowerTx.text = emoji.power.toString()
+            binding.deckEmojiCostTx.text = emoji.baseCost.toString()
+            binding.deckEmojiPowerTx.text = emoji.basePower.toString()
             binding.deckEmojiNameTx.text = emoji.name
 
             binding.root.setOnClickListener {

@@ -37,7 +37,7 @@ class Deck(private val title: String, private val emojis: ArrayList<Emoji>) {
     }
 
     fun sort() {
-        emojis.sortWith(compareBy({ it.cost }, { it.power }))
+        emojis.sortWith(compareBy({ it.baseCost }, { it.basePower }))
     }
 
     // Get the remaining number of emojis in the deck

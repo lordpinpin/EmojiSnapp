@@ -20,12 +20,12 @@ class TrackActivity : AppCompatActivity() {
         binding = ActivityTrackBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val emojiList = DataGenerator.loadData()
+        val emojiList = EmojiFactory.getEmojisWithPositiveUnlockThreshold()
 
         val layoutManager = LinearLayoutManager(this)
         layoutManager.reverseLayout = true
         layoutManager.stackFromEnd = true
-        val progress = intent.getIntExtra("CUR_LEVEL", 17);
+        val progress = intent.getIntExtra("CUR_LEVEL", 25);
 
         binding.recyclerView.layoutManager = layoutManager
         binding.recyclerView.adapter = TrackAdapter(emojiList, progress, this)

@@ -47,8 +47,8 @@ class HistoryActivity : AppCompatActivity() {
 
         val binding = DialogEmojiDetailsBinding.inflate(layoutInflater)
         binding.detailEmojiIconTx.text = emoji.icon
-        binding.detailEmojiCostTx.text = "${emoji.cost}"
-        binding.detailEmojiPowerTx.text = "${emoji.power}"
+        binding.detailEmojiCostTx.text = "${emoji.baseCost}"
+        binding.detailEmojiPowerTx.text = "${emoji.basePower}"
         binding.detailEmojiNameTx.text = emoji.name
         binding.detailEmojiDescTx.setText(emoji.description)
 

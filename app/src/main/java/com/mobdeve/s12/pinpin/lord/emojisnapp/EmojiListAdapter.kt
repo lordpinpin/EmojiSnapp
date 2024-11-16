@@ -10,8 +10,8 @@ class EmojiListAdapter(private val emojiList: List<Emoji>, private val onEmojiCl
     inner class EmojiViewHolder(val binding: ListEmojiBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(emoji: Emoji) {
             binding.listEmojiIconTx.text = emoji.icon
-            binding.listEmojiCostTx.text = emoji.cost.toString()
-            binding.listEmojiPowerTx.text = emoji.power.toString()
+            binding.listEmojiCostTx.text = emoji.baseCost.toString()
+            binding.listEmojiPowerTx.text = emoji.basePower.toString()
             binding.listEmojiNameTx.text = emoji.name
 
             binding.root.setOnClickListener {
