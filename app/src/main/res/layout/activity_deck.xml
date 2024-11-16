@@ -77,9 +77,11 @@
         app:layout_constraintTop_toBottomOf="@+id/deckHeaderTx">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerDeckEmoji"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:id="@+id/deckEmojiRv"
+            android:layout_width="380dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
             android:isScrollContainer="false"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -110,10 +112,12 @@
         app:layout_constraintTop_toBottomOf="@+id/deckListTx">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerDecks"
+            android:id="@+id/deckRv"
             android:layout_width="0dp"
             android:layout_height="100dp"
+            android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
+            android:layout_marginEnd="10dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -171,8 +175,8 @@
         app:layout_constraintTop_toBottomOf="@+id/deckEmojiListTx">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerEmojiList"
-            android:layout_width="wrap_content"
+            android:id="@+id/emojiListRv"
+            android:layout_width="380dp"
             android:layout_height="0dp"
             android:clipToPadding="false"
             android:paddingTop="10sp"

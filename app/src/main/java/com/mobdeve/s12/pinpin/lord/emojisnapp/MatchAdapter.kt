@@ -37,17 +37,19 @@ class MatchAdapter(
             val myDeckAdapter = DeckEmojiAdapter(match.deck.getEmojis()) { emoji ->
                 onEmojiClick(emoji)
             }
-            binding.recyclerMyDeck.layoutManager = GridLayoutManager(binding.root.context, 6)
-            binding.recyclerMyDeck.adapter = myDeckAdapter
-            binding.recyclerMyDeck.isNestedScrollingEnabled = false
+            binding.myDeckRv.layoutManager = GridLayoutManager(binding.root.context, 6)
+            binding.myDeckRv.adapter = myDeckAdapter
+            binding.myDeckRv.isNestedScrollingEnabled = false
+            binding.myDeckRv.setHasFixedSize(true)
 
             // Set up opponent's deck RecyclerView
             val oppDeckAdapter = DeckEmojiAdapter(match.oppDeck.getEmojis()) { emoji ->
                 onEmojiClick(emoji)
             }
-            binding.recyclerOppDeck.layoutManager = GridLayoutManager(binding.root.context, 6)
-            binding.recyclerOppDeck.adapter = oppDeckAdapter
-            binding.recyclerOppDeck.isNestedScrollingEnabled = false
+            binding.oppDeckRv.layoutManager = GridLayoutManager(binding.root.context, 6)
+            binding.oppDeckRv.adapter = oppDeckAdapter
+            binding.oppDeckRv.isNestedScrollingEnabled = false
+            binding.oppDeckRv.setHasFixedSize(true)
 
             binding.dropdown.visibility = View.GONE
             binding.matchDownBtn.setOnClickListener {

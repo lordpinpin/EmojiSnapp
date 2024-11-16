@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="65dp"
+    android:layout_height="50dp">
+
+    <TextView
+        android:id="@+id/gameEmojiIconTx"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:fontFamily="@font/noto_color_emoji_compat"
+        android:text="😀"
+        android:textAlignment="center"
+        android:textSize="25sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.75"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/gameEmojiCostTx"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="2dp"
+        android:layout_marginBottom="4dp"
+        android:fontFamily="@font/bagel_fat_one"
+        android:text="4"
+        android:textColor="@color/emojipink"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/gameEmojiIconTx" />
+
+    <TextView
+        android:id="@+id/gameEmojiPowerTx"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="2dp"
+        android:fontFamily="@font/bagel_fat_one"
+        android:text="24"
+        android:textColor="@color/emojiyellow"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toStartOf="@+id/gameEmojiIconTx"
+        app:layout_constraintTop_toTopOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

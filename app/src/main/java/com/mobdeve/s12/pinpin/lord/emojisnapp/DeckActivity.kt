@@ -61,24 +61,24 @@ class DeckActivity : AppCompatActivity() {
         var deckEmojiAdapter = DeckEmojiAdapter(deckData[0].getEmojis()) { emoji ->
             showEmojiDetailsPopup(emoji, EmojiType.DECK_EMOJI)
         }
-        binding.recyclerDeckEmoji.layoutManager = GridLayoutManager(this, 6)
-        binding.recyclerDeckEmoji.adapter = deckEmojiAdapter
-        binding.recyclerDeckEmoji.isNestedScrollingEnabled = false
+        binding.deckEmojiRv.layoutManager = GridLayoutManager(this, 6)
+        binding.deckEmojiRv.adapter = deckEmojiAdapter
+        binding.deckEmojiRv.isNestedScrollingEnabled = false
+        binding.deckEmojiRv.setHasFixedSize(true)
         binding.deckTitleTx.text = deckData[0].getTitle()
         deckEmojiAdapter.notifyItemRangeChanged(0, deckData[0].getEmojis().size)
+
 
         val deckBackAdapter = DeckBackAdapter(deckData) { selectedDeck ->
             updateEmojiRecycler(selectedDeck)
         }
-        binding.recyclerDecks.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        binding.recyclerDecks.adapter = deckBackAdapter
+        binding.deckRv.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        binding.deckRv.adapter = deckBackAdapter
 
-        binding.recyclerEmojiList.layoutManager = GridLayoutManager(this, 4)
-
-
+        binding.emojiListRv.layoutManager = GridLayoutManager(this, 4)
         val allEmojis = EmojiFactory.getEmojisSortedByName()
         val sortedEmojis = allEmojis.sortedWith(compareBy({ it.baseCost }, { it.basePower }))
-        binding.recyclerEmojiList.adapter = EmojiListAdapter(sortedEmojis) { emoji ->
+        binding.emojiListRv.adapter = EmojiListAdapter(sortedEmojis) { emoji ->
             showEmojiDetailsPopup(emoji, EmojiType.LIST_EMOJI)
         }
 
@@ -98,7 +98,7 @@ class DeckActivity : AppCompatActivity() {
         var deckEmojiAdapter = DeckEmojiAdapter(deck.getEmojis()) { emoji ->
             showEmojiDetailsPopup(emoji, EmojiType.DECK_EMOJI)
         }
-        binding.recyclerDeckEmoji.adapter = deckEmojiAdapter
+        binding.deckEmojiRv.adapter = deckEmojiAdapter
         binding.deckTitleTx.text = deck.getTitle()
         deckEmojiAdapter.notifyItemRangeChanged(0, deck.getEmojis().size)
     }

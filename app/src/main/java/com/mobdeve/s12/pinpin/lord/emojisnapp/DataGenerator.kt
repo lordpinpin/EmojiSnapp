@@ -53,5 +53,76 @@ class DataGenerator {
 
             return data
         }
+
+        fun loadLocations(): ArrayList<Location> {
+            val allLocations = arrayListOf(
+                Location(
+                    icon = "🚯",
+                    name = "Dumpster",
+                    description = "Emojis here have -3 power."
+                ),
+                Location(
+                    icon = "🏔️",
+                    name = "Mountain",
+                    description = "Emojis with less than 4 power cannot be played here."
+                ),
+                Location(
+                    icon = "📄",
+                    name = "Blank Page",
+                    description = "No effect."
+                ),
+                Location(
+                    icon = "🏰",
+                    name = "Castle",
+                    description = "Ongoing: All Emojis here gain +2 power."
+                ),
+                Location(
+                    icon = "🚀",
+                    name = "Space Station",
+                    description = "+1 power for each Emoji in other locations."
+                ),
+                Location(
+                    icon = "🌋",
+                    name = "Volcano",
+                    description = "Destroy the three weakest Emojis at the end of the game."
+                ),
+                Location(
+                    icon = "🏟️",
+                    name = "Arena",
+                    description = "On reveal: Double the power of all Emojis here."
+                ),
+                Location(
+                    icon = "🌉",
+                    name = "Bridge",
+                    description = "On play: Move one Emoji from here to another location."
+                ),
+                Location(
+                    icon = "🌌",
+                    name = "Galaxy",
+                    description = "Ongoing: Emojis here cannot be affected by abilities."
+                ),
+                Location(
+                    icon = "💡",
+                    name = "Idea Lab",
+                    description = "On play: Draw a card from your deck."
+                )
+            )
+
+            // Shuffle and pick 5 random locations
+            allLocations.shuffle()
+            return ArrayList(allLocations.take(5))
+        }
+
+        fun loadFiveEmojis() : List<Emoji> {
+            return EmojiFactory.getEmojisSortedByName().shuffled().take(5)
+        }
+
+        fun loadFourEmojis() : List<Emoji> {
+            return EmojiFactory.getEmojisSortedByName().shuffled().take(4)
+        }
+
+        fun loadThreeEmojis() : List<Emoji> {
+            return EmojiFactory.getEmojisSortedByName().shuffled().take(3)
+        }
     }
 }

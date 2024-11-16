@@ -27,9 +27,9 @@ class TrackActivity : AppCompatActivity() {
         layoutManager.stackFromEnd = true
         val progress = intent.getIntExtra("CUR_LEVEL", 25);
 
-        binding.recyclerView.layoutManager = layoutManager
-        binding.recyclerView.adapter = TrackAdapter(emojiList, progress, this)
-        binding.recyclerView.scrollToPosition(0)
+        binding.collectionRv.layoutManager = layoutManager
+        binding.collectionRv.adapter = TrackAdapter(emojiList, progress, this)
+        binding.collectionRv.scrollToPosition(0)
 
         // Makes B&W
         val colorMatrix = ColorMatrix()
