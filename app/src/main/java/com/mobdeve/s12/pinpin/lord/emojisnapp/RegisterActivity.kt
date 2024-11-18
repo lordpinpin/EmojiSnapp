@@ -6,6 +6,9 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
+import com.mobdeve.s12.pinpin.lord.emojisnapp.databinding.ActivityMainBinding
 import com.mobdeve.s12.pinpin.lord.emojisnapp.databinding.ActivityMenuBinding
 import com.mobdeve.s12.pinpin.lord.emojisnapp.databinding.ActivityRegisterBinding
 
@@ -16,24 +19,24 @@ class RegisterActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
         binding.registerConfirmBtn.setOnClickListener {
-            val isRegistrationSuccessful = registerUser()
-            if (isRegistrationSuccessful) {
-                val resultIntent = Intent()
-                resultIntent.putExtra("REGISTER_STATUS", "success")
-                setResult(RESULT_OK, resultIntent)
-                finish()
+            val email = binding.registerEmailEt.text.toString()
+            val password = binding.registerPasswordEt.text.toString()
+            Firebase.auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    val resultIntent = Intent()
+                    resultIntent.putExtra("REGISTER_STATUS", "success")
+                    setResult(RESULT_OK, resultIntent)
+                    finish()
+                }
             }
         }
 
         binding.registerBackBtn.setOnClickListener {
             finish()
         }
-    }
-
-    private fun registerUser(): Boolean {
-        // TODO: Check registration
-        return true
     }
 }
