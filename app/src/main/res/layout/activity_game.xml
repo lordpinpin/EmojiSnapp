@@ -50,7 +50,7 @@
         android:layout_width="280dp"
         android:layout_height="110dp"
         android:layout_marginStart="10dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="8dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/locationRv" />
 
@@ -70,7 +70,7 @@
         android:id="@+id/energyTx"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="8dp"
         android:fontFamily="@font/allerta"
         android:text="Energy: 1"
         android:textAlignment="center"
@@ -89,6 +89,20 @@
         android:paddingRight="18dp"
         android:text="End Turn"
         app:layout_constraintBottom_toBottomOf="@+id/handRv"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/handRv" />
+
+    <Button
+        android:id="@+id/undoBtn"
+        android:layout_width="72dp"
+        android:layout_height="36dp"
+        android:backgroundTint="@color/emojired"
+        android:fontFamily="@font/allerta"
+        android:paddingLeft="18dp"
+        android:paddingRight="18dp"
+        android:text="Undo"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toTopOf="@+id/endBtn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/handRv" />
 

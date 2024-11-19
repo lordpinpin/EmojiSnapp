@@ -54,6 +54,58 @@ class DataGenerator {
             return data
         }
 
+        fun loadActiveBasicData(): ArrayList<Emoji> {
+            val data = ArrayList<Emoji>()
+
+            // Adding emojis using only name and using the updated getEmojiCopy
+            data.add(EmojiFactory.getEmojiCopy("Smiley Face"))
+            data.add(EmojiFactory.getEmojiCopy("Laughing Tears"))
+            data.add(EmojiFactory.getEmojiCopy("Heart Eyes"))
+            data.add(EmojiFactory.getEmojiCopy("Cool Sunglasses"))
+            data.add(EmojiFactory.getEmojiCopy("Crying Face"))
+            data.add(EmojiFactory.getEmojiCopy("Winking Face"))
+            data.add(EmojiFactory.getEmojiCopy("Party Popper"))
+            data.add(EmojiFactory.getEmojiCopy("Fire"))
+            data.add(EmojiFactory.getEmojiCopy("Hundred Points"))
+            data.add(EmojiFactory.getEmojiCopy("Rocket"))
+            data.add(EmojiFactory.getEmojiCopy("Glowing Star"))
+            data.add(EmojiFactory.getEmojiCopy("Four Leaf Clover"))
+            data.add(EmojiFactory.getEmojiCopy("Puzzle Piece"))
+            data.add(EmojiFactory.getEmojiCopy("Bullseye"))
+            data.add(EmojiFactory.getEmojiCopy("Sparkles"))
+            data.add(EmojiFactory.getEmojiCopy("Peace Dove"))
+            data.add(EmojiFactory.getEmojiCopy("Rainbow"))
+            data.add(EmojiFactory.getEmojiCopy("Strong Arm"))
+
+            return data
+        }
+
+        fun loadActiveAlternativeData(): ArrayList<Emoji> {
+            val data = ArrayList<Emoji>()
+
+            // Replacing the first six with new Emoji objects using only name and using the updated getEmojiCopy
+            data.add(EmojiFactory.getEmojiCopy("Angel Face"))
+            data.add(EmojiFactory.getEmojiCopy("Robot"))
+            data.add(EmojiFactory.getEmojiCopy("Unicorn"))
+            data.add(EmojiFactory.getEmojiCopy("Alien"))
+            data.add(EmojiFactory.getEmojiCopy("Clown"))
+            data.add(EmojiFactory.getEmojiCopy("Dragon"))
+            data.add(EmojiFactory.getEmojiCopy("Party Popper"))
+            data.add(EmojiFactory.getEmojiCopy("Fire"))
+            data.add(EmojiFactory.getEmojiCopy("Hundred Points"))
+            data.add(EmojiFactory.getEmojiCopy("Rocket"))
+            data.add(EmojiFactory.getEmojiCopy("Glowing Star"))
+            data.add(EmojiFactory.getEmojiCopy("Four Leaf Clover"))
+            data.add(EmojiFactory.getEmojiCopy("Puzzle Piece"))
+            data.add(EmojiFactory.getEmojiCopy("Bullseye"))
+            data.add(EmojiFactory.getEmojiCopy("Sparkles"))
+            data.add(EmojiFactory.getEmojiCopy("Peace Dove"))
+            data.add(EmojiFactory.getEmojiCopy("Rainbow"))
+            data.add(EmojiFactory.getEmojiCopy("Strong Arm"))
+
+            return data
+        }
+
         fun loadLocations(): ArrayList<Location> {
             val allLocations = arrayListOf(
                 Location(

@@ -86,7 +86,7 @@ object EmojiFactory {
                 unlockThreshold = 0
             ),
             Emoji("🎯", "Bullseye",
-                description = "Condition: Can only be played if you didn't play a card the previous turn.",
+                description = "Condition: Can only be played in the middle location.",
                 baseCost = 8,
                 basePower = 25,
                 unlockThreshold = 0
@@ -98,7 +98,7 @@ object EmojiFactory {
                 unlockThreshold = 0
             ),
             Emoji("🕊️", "Peace Dove",
-                description = "Ongoing: Emojis with equal or less than 3-Cost can be played in this location.",
+                description = "Ongoing: Only 3-Cost or less Emojis can be played in this location.",
                 baseCost = 3,
                 basePower = 3,
                 unlockThreshold = 0
@@ -157,6 +157,7 @@ object EmojiFactory {
         for (emoji in emojis) {
             val key = "${emoji.name}-${emoji.icon}" // Unique key based on name and icon
             emojiCache[key] = emoji
+            emojiCache[emoji.name] = emoji
         }
     }
 
@@ -165,6 +166,14 @@ object EmojiFactory {
         val key = "$name-$icon"  // Unique key based on name and icon
 
         return emojiCache[key]!!
+    }
+
+    fun getEmojiCopy(icon: String, name: String): Emoji {
+        val key = "$name-$icon"  // Correct key format
+        val cachedEmoji = emojiCache[key]
+            ?: throw IllegalArgumentException("Emoji with name $name and icon $icon not found in the cache")
+
+        return cachedEmoji.copy()
     }
 
     // Method to create a modifiable copy of an Emoji

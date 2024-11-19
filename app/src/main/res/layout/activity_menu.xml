@@ -11,7 +11,7 @@
         android:id="@+id/logoMenuTv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="100dp"
+        android:layout_marginTop="64dp"
         android:fontFamily="@font/bagel_fat_one"
         android:lineSpacingExtra="-48sp"
         android:text="EMOJI\nSNAP"
@@ -26,7 +26,7 @@
         android:id="@+id/playBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="64dp"
         android:backgroundTint="#E68905"
         android:fontFamily="@font/allerta"
         android:paddingTop="10sp"
@@ -107,12 +107,24 @@
         android:id="@+id/welcomeTx"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="8dp"
         android:fontFamily="@font/allerta"
         android:text="TextView"
-        android:textSize="20sp"
+        android:textSize="14sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/logoMenuTv" />
+
+    <TextView
+        android:id="@+id/currentDeckTx"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:fontFamily="@font/allerta"
+        android:text="Current Deck: "
+        app:layout_constraintBottom_toTopOf="@+id/playBtn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

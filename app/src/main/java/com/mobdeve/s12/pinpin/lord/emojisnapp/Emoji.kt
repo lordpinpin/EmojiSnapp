@@ -9,15 +9,23 @@ data class Emoji(
     val basePower: Int, // Default power
     val unlockThreshold: Int // Unlock threshold
 ) {
-    // Modifier that affect total power
-    var modifier: Int = 0
-        private set
+    // Modifier that affects total power
+    private var modifier: Int = 0
     var currentPower: Int = basePower
-        private set
     val propertyMap: MutableMap<String, Boolean> = mutableMapOf()
 
-    // Function to create a copy of the emoji with modified properties
-    fun copy(): Emoji {
-        return this.copy()
+    // Getter for modifier
+    fun getModifier(): Int = modifier
+
+    // Function to set modifier, which updates the current power
+    fun setModifier(newModifier: Int) {
+        modifier = newModifier
+        updateCurrentPower()
     }
+
+    // Function to apply the modifier and update the current power
+    private fun updateCurrentPower() {
+        currentPower = basePower + modifier
+    }
+
 }

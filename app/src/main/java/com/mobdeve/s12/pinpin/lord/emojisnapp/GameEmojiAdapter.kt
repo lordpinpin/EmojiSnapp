@@ -1,19 +1,23 @@
 package com.mobdeve.s12.pinpin.lord.emojisnapp
 
+import android.animation.ObjectAnimator
+import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.mobdeve.s12.pinpin.lord.emojisnapp.databinding.GameEmojiBinding
 
-class GameEmojiAdapter (val emojiList: List<Emoji>, val onEmojiClick: (Emoji) -> Unit) : RecyclerView.Adapter<GameEmojiAdapter.EmojiViewHolder>()
+class GameEmojiAdapter (var emojiList: MutableList<Emoji>, val onEmojiClick: (Emoji) -> Unit) : RecyclerView.Adapter<GameEmojiAdapter.EmojiViewHolder>()
     {
 
-    inner class EmojiViewHolder(val binding: GameEmojiBinding) :
-        RecyclerView.ViewHolder(binding.root) {
+    inner class EmojiViewHolder(val binding: GameEmojiBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(emoji: Emoji) {
             binding.gameEmojiIconTx.text = emoji.icon
             binding.gameEmojiCostTx.text = emoji.baseCost.toString()
             binding.gameEmojiPowerTx.text = emoji.basePower.toString()
+
+            animateEmojiAddition(binding.root)
 
             binding.root.setOnClickListener {
                 onEmojiClick(emoji)
@@ -31,4 +35,18 @@ class GameEmojiAdapter (val emojiList: List<Emoji>, val onEmojiClick: (Emoji) ->
     }
 
     override fun getItemCount(): Int = emojiList.size
+
+    private fun animateEmojiAddition(emojiView: View) {
+        val fadeIn = ObjectAnimator.ofFloat(emojiView, "alpha", 0f, 1f)
+        fadeIn.duration = 500  // Set the duration for the fade-in animation
+        fadeIn.start()
+    }
+
+    fun setEmojis(newEmojis: MutableList<Emoji>) {
+        Log.d("GameEmojiAdapter", "$newEmojis")
+        emojiList = newEmojis
+
+        notifyDataSetChanged()  // Notify the adapter that the data has changed
+    }
+
 }
