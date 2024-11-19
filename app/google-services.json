@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "376532234635",
+    "project_id": "mco3-7e1e6",
+    "storage_bucket": "mco3-7e1e6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:376532234635:android:fa1f80cdf66eca620d7f8e",
+        "android_client_info": {
+          "package_name": "com.mobdeve.s12.pinpin.lord.emojisnapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAyf_CzKjQSp4o1uQPVZdn7H_SVhCi69_0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
