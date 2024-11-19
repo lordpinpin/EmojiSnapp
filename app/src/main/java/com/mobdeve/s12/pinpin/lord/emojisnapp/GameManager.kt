@@ -1,15 +1,28 @@
 package com.mobdeve.s12.pinpin.lord.emojisnapp
 
 import android.util.Log
+import com.google.firebase.Firebase
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.MutableData
+import com.google.firebase.database.Transaction
+import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.database
+import java.util.UUID
 import kotlin.random.Random
 
 
 class GameManager (
     private val playerDeck: Deck,
     private val oppDeck: Deck,
-    private val againstBot: Boolean
+    private val againstBot: Boolean,
+    private val onOpponentTurnComplete : () -> Unit
 )
 {
+    private val instance = FirebaseDatabase.getInstance("https://mco3-7e1e6-default-rtdb.asia-southeast1.firebasedatabase.app/")
+    private val database: DatabaseReference = instance.getReference("TODO_CHANGE_THIS")
     private val emojisInHand = mutableListOf<Emoji>()
     private val locations : List<Location> = DataGenerator.loadLocations()
     private val playerEmojisInLocations = mutableListOf<MutableList<Emoji>>()
@@ -19,11 +32,27 @@ class GameManager (
     private var botAnte = false;
     var ante = 1
     var currentTurn = 0
-    private var gameTurn = GameTurn()
+    private var myGameTurnUuid = UUID.randomUUID().toString();
+    private var gameTurn = GameTurn(myGameTurnUuid)
     var currentEnergy = 0
     private var error = ""
 
     init {
+        database.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val recvGameTurn = snapshot.getValue(GameTurn::class.java) ?: return
+                if(recvGameTurn.uuid != myGameTurnUuid) { // change was from other client (not us)
+                    gameTurn.opponentEmojisPlaced.clear()
+                    gameTurn.opponentEmojisPlaced.addAll(recvGameTurn.opponentEmojisPlaced) // other client already puts it on opponentEmojisPlaced
+                    onOpponentTurnComplete()
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("Firebase", "Error reading currentTurn: ${error.message}")
+            }
+        })
+
         playerDeck.shuffle()
         repeat(5) {
             playerDeck.draw()?.let { emojisInHand.add(it) }
@@ -86,8 +115,18 @@ class GameManager (
 
     fun endTurn(){
         if (againstBot) {
+            // available immediately
 
         } else {
+            val test = database.setValue(gameTurn.toOtherPlayersPOV())
+            test.addOnCompleteListener { task ->
+                if(task.isSuccessful) {
+                    Log.d("GameManager", "Successful")
+                } else {
+                    Log.d("GameManager", task.exception.toString())
+                }
+            }
+            Log.d("GameManager", "Writing")
             //TODO: Wait for opponent endTurn
             //TODO: Send Player moves to opponent
             //TODO: Recieve opp moves
@@ -95,6 +134,8 @@ class GameManager (
             //TODO: Check if opponent ante'd
             //TODo: Add opp moves to GameTurn.
         }
+
+        onOpponentTurnComplete()
     }
 
     fun ante(): Boolean {
