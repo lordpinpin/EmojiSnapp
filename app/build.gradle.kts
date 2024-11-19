@@ -68,6 +68,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.emoji2.bundled)
     implementation(libs.androidx.animation.graphics.android)
+    implementation(libs.firebase.auth.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -80,5 +81,6 @@ dependencies {
     implementation(libs.androidx.emoji2.views)
     implementation(libs.androidx.emoji2.views.helper)
     implementation(libs.androidx.startup.runtime)
-
+    implementation(platform("com.google.firebase:firebase-bom:33.6.0"))
+    implementation(libs.firebase.analytics)
 }
