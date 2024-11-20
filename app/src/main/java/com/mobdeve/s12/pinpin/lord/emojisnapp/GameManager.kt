@@ -176,7 +176,7 @@ class GameManager (
             getBotMoves()
         } else {
 
-            getOverallWinner()
+
             tieBreakerRef.removeValue().addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     Log.d("GameManager", "Tiebreaker flushed successfully")
@@ -188,6 +188,7 @@ class GameManager (
                     getOverallWinner()
                 }
             }
+            getOverallWinner()
         }
 
 
