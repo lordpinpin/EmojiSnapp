@@ -23,6 +23,8 @@ class GameManager (
 {
     private val instance = FirebaseDatabase.getInstance("https://mco3-7e1e6-default-rtdb.asia-southeast1.firebasedatabase.app/")
     private val database: DatabaseReference = instance.getReference("TODO_CHANGE_THIS")
+    private val tieBreakerRef = database.child("tieBreakerResult")
+
     private val emojisInHand = mutableListOf<Emoji>()
     private val locations : List<Location> = DataGenerator.loadLocations()
     private val playerEmojisInLocations = mutableListOf<MutableList<Emoji>>()
@@ -65,6 +67,8 @@ class GameManager (
                 oppDeck.draw()?.let { botHand.add(it) }
             }
         }
+
+        getOverallWinner()
 
 
 
@@ -170,7 +174,25 @@ class GameManager (
         if (againstBot) {
             oppDeck.draw()?.let { botHand.add(it) }
             getBotMoves()
+        } else {
+
+            getOverallWinner()
+            tieBreakerRef.removeValue().addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Log.d("GameManager", "Tiebreaker flushed successfully")
+
+                    // Proceed to determine the winner
+                    getOverallWinner()
+                } else {
+                    Log.e("GameManager", "Failed to flush tiebreaker: ${task.exception?.message}")
+                    getOverallWinner()
+                }
+            }
         }
+
+
+
+
 
         // Invoke the callback after the turn setup is complete
         onComplete()
@@ -214,7 +236,42 @@ class GameManager (
         return when {
             playerWins > opponentWins -> "Player"
             opponentWins > playerWins -> "Opponent"
-            else -> if (Random.nextBoolean()) "Player" else "Opponent" // Randomly pick if there's a tie
+            else -> {
+                if(againstBot){
+                    if (Random.nextBoolean()) "Player" else "Opponent" // Randomly pick if there's a tie
+                } else { // TODO: TEST THIS
+                    var result = "Player" // Default value in case of error
+                    tieBreakerRef.runTransaction(object : Transaction.Handler {
+                        override fun doTransaction(mutableData: MutableData): Transaction.Result {
+                            val existingResult = mutableData.getValue(String::class.java)
+                            if (existingResult == null) {
+                                // Generate a new random result if none exists
+                                val newResult = if (Random.nextBoolean()) "Player" else "Opponent"
+                                mutableData.value = newResult
+                                result = newResult
+                            } else {
+                                // Use the existing result
+                                result = existingResult
+                            }
+                            return Transaction.success(mutableData)
+                        }
+
+                        override fun onComplete(
+                            databaseError: DatabaseError?,
+                            committed: Boolean,
+                            dataSnapshot: DataSnapshot?
+                        ) {
+                            if (databaseError != null) {
+                                Log.e(
+                                    "GameManager",
+                                    "Error resolving tie: ${databaseError.message}"
+                                )
+                            }
+                        }
+                    })
+                    result // Return the determined result
+                }
+            }
         }
     }
 
