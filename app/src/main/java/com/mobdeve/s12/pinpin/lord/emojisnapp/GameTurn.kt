@@ -6,6 +6,7 @@ class GameTurn {
     // Holds the emojis placed during the turn and their locations
     val playerEmojisPlaced = mutableListOf<Pair<Emoji, Int>>()  // Pair of Emoji and its location index
     val opponentEmojisPlaced = mutableListOf<Pair<Emoji, Int>>()  // Same for opponent, if applicable
+    var fleed = false
 
     // Method to record a player's emoji placement
     fun recordPlayerEmojiPlacement(emoji: Emoji, locationIndex: Int) {
@@ -44,5 +45,9 @@ class GameTurn {
     fun resetTurn() {
         playerEmojisPlaced.clear()
         opponentEmojisPlaced.clear()
+    }
+
+    fun flee(){
+        fleed = true
     }
 }

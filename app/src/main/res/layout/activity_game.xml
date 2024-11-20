@@ -94,16 +94,34 @@
 
     <Button
         android:id="@+id/undoBtn"
-        android:layout_width="72dp"
-        android:layout_height="36dp"
+        android:layout_width="45dp"
+        android:layout_height="35dp"
+        android:layout_marginBottom="4dp"
         android:backgroundTint="@color/emojired"
         android:fontFamily="@font/allerta"
-        android:paddingLeft="18dp"
-        android:paddingRight="18dp"
+        android:paddingLeft="6dp"
+        android:paddingRight="6dp"
         android:text="Undo"
         android:textSize="12sp"
         app:layout_constraintBottom_toTopOf="@+id/endBtn"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.144"
+        app:layout_constraintStart_toEndOf="@+id/handRv" />
+
+    <Button
+        android:id="@+id/escBtn"
+        android:layout_width="45dp"
+        android:layout_height="35dp"
+        android:layout_marginBottom="4dp"
+        android:backgroundTint="@color/emojired"
+        android:fontFamily="@font/allerta"
+        android:paddingLeft="6dp"
+        android:paddingRight="6dp"
+        android:text="Esc"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toTopOf="@+id/endBtn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.861"
         app:layout_constraintStart_toEndOf="@+id/handRv" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

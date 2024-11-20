@@ -2,32 +2,21 @@ package com.mobdeve.s12.pinpin.lord.emojisnapp
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
-import android.app.Activity
-import android.content.Context
-import android.content.Intent
 import android.graphics.Color
-import android.graphics.PixelFormat
 import android.graphics.Rect
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.util.TypedValue
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
-import android.view.ViewGroup
-import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.mobdeve.s12.pinpin.lord.emojisnapp.databinding.ActivityGameBinding
 import com.mobdeve.s12.pinpin.lord.emojisnapp.databinding.DialogEmojiDetailsBinding
@@ -90,8 +79,16 @@ class GameActivity : AppCompatActivity()  {
         }
 
         binding.endBtn.setOnClickListener {
-            gameManager.endTurn()
-            revealMoves()
+            var oppRetreat = gameManager.endTurn()
+            if(oppRetreat){
+                fleedGame()
+            } else {
+                revealMoves()
+            }
+        }
+
+        binding.escBtn.setOnClickListener {
+            retreatGame()
         }
 
         startNewTurn()
@@ -160,6 +157,42 @@ class GameActivity : AppCompatActivity()  {
                     showDrawResultDialog() // Show draw dialog
                 }
             }
+
+            // After showing the dialog, add a delay before exiting the activity
+            val exitDelayMillis = 4000L
+            Handler(Looper.getMainLooper()).postDelayed({
+                finish() // Exit the activity
+            }, exitDelayMillis)
+
+        }, dialogDelayMillis)
+    }
+
+    private fun retreatGame() {
+
+        gameManager.forfeitGame()
+
+        val dialogDelayMillis = 2000L
+        Handler(Looper.getMainLooper()).postDelayed({
+            showEscapeResultDialog(gameManager.ante) // Show lose dialog
+
+
+            // After showing the dialog, add a delay before exiting the activity
+            val exitDelayMillis = 4000L
+            Handler(Looper.getMainLooper()).postDelayed({
+                finish() // Exit the activity
+            }, exitDelayMillis)
+
+        }, dialogDelayMillis)
+    }
+
+    private fun fleedGame() {
+
+        gameManager.forfeitGame()
+
+        val dialogDelayMillis = 2000L
+        Handler(Looper.getMainLooper()).postDelayed({
+            showFleeResultDialog(gameManager.ante) // Show lose dialog
+
 
             // After showing the dialog, add a delay before exiting the activity
             val exitDelayMillis = 4000L
@@ -420,6 +453,30 @@ class GameActivity : AppCompatActivity()  {
             .setMessage("You lost $points points!")
             .setPositiveButton("OK") { dialog, _ -> dialog.dismiss()
                                                          finish() }
+            .create()
+
+        dialog.show()
+    }
+
+    private fun showEscapeResultDialog(points : Int) {
+        var doublePoints = points * 2
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("Forfeited.")
+            .setMessage("You lost $points instead of $doublePoints points.")
+            .setPositiveButton("OK") { dialog, _ -> dialog.dismiss()
+                finish() }
+            .create()
+
+        dialog.show()
+    }
+
+    private fun showFleeResultDialog(points : Int) {
+        var doublePoints = points * 2
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("Opponent flees!")
+            .setMessage("You gain $points instead of $doublePoints points.")
+            .setPositiveButton("OK") { dialog, _ -> dialog.dismiss()
+                finish() }
             .create()
 
         dialog.show()

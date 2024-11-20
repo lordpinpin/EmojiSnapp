@@ -84,16 +84,30 @@ class GameManager (
         gameTurn.resetTurn()
     }
 
-    fun endTurn(){
+    fun endTurn(): Boolean {
         if (againstBot) {
 
         } else {
             //TODO: Wait for opponent endTurn
             //TODO: Send Player moves to opponent
             //TODO: Recieve opp moves
+
+            //TODO: Check if opponent retreated
+            if (false){ // Replace with opponent flee check
+                return true
+            }
+
             //TODO: Send to opponent if you ante'd
             //TODO: Check if opponent ante'd
             //TODo: Add opp moves to GameTurn.
+        }
+        return false
+    }
+
+    fun forfeitGame(){
+        if (!againstBot) {
+            gameTurn.flee()
+            //TODO: Send to other player that I retreated.
         }
     }
 
