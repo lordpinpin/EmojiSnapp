@@ -71,6 +71,7 @@ dependencies {
     implementation(libs.androidx.emoji2.bundled)
     implementation(libs.androidx.animation.graphics.android)
     implementation(libs.firebase.auth.ktx)
+    implementation(libs.firebase.database.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

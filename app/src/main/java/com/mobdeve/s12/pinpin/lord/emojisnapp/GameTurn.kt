@@ -2,7 +2,15 @@ package com.mobdeve.s12.pinpin.lord.emojisnapp
 
 import android.util.Log
 
-class GameTurn {
+class GameTurn () {
+    // uuid used to determine who changed it last
+    var uuid: String = ""
+
+    // need to separate constructor for Firebase to work
+    constructor(uuid: String) : this() {
+        this.uuid = uuid
+    }
+
     // Holds the emojis placed during the turn and their locations
     val playerEmojisPlaced = mutableListOf<Pair<Emoji, Int>>()  // Pair of Emoji and its location index
     val opponentEmojisPlaced = mutableListOf<Pair<Emoji, Int>>()  // Same for opponent, if applicable
@@ -49,5 +57,12 @@ class GameTurn {
 
     fun flee(){
         fleed = true
+    }
+
+    fun toOtherPlayersPOV() : GameTurn {
+        val ret = GameTurn(this.uuid)
+        ret.opponentEmojisPlaced.addAll(this.playerEmojisPlaced)
+        ret.playerEmojisPlaced.addAll(this.opponentEmojisPlaced)
+        return ret
     }
 }

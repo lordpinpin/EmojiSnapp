@@ -41,7 +41,12 @@ class GameActivity : AppCompatActivity()  {
         var playerDeck = Deck("Basic Deck", DataGenerator.loadActiveBasicData());
         var oppDeck = Deck("Alternative Deck", DataGenerator.loadActiveAlternativeData());
         /// TODO: Currently only against bot
-        gameManager = GameManager(playerDeck, oppDeck, true)
+        gameManager = GameManager(playerDeck, oppDeck, true) {
+            // hack to make this render later
+            runOnUiThread({
+                revealMoves()
+            })
+        }
 
         binding.snapTx.setOnClickListener {
             if(gameManager.ante()){
