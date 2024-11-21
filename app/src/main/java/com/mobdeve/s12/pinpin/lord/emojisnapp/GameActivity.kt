@@ -50,8 +50,8 @@ class GameActivity : AppCompatActivity()  {
 
         binding.snapTx.setOnClickListener {
             if(gameManager.ante()){
-                val scaleX = ObjectAnimator.ofFloat(binding.snapTx, "scaleX", 1f, 1.1f, 1f)
-                val scaleY = ObjectAnimator.ofFloat(binding.snapTx, "scaleY", 1f, 1.1f, 1f)
+                val scaleX = ObjectAnimator.ofFloat(binding.snapTx, "scaleX", 1f, 1.2f, 1f)
+                val scaleY = ObjectAnimator.ofFloat(binding.snapTx, "scaleY", 1f, 1.2f, 1f)
                 val rotate = ObjectAnimator.ofFloat(binding.snapTx, "rotation", 0f, 15f, -15f, 0f)
 
                 val animatorSet = AnimatorSet()
@@ -129,9 +129,7 @@ class GameActivity : AppCompatActivity()  {
                 binding.anteTx.text = gameManager.ante.toString()
 
                 handAdapter.notifyItemInserted(emojisInHand.size - 1)
-                binding.handRv.post {
-                    updateEmojiOverlays()
-                }
+
 
                 binding.locationRv.post {
                     locationAdapter.updateAllTotals(
@@ -139,6 +137,8 @@ class GameActivity : AppCompatActivity()  {
                         gameManager.getOpponentTotals()
                     )
                 }
+
+                updateEmojiOverlays()
             }
         } else {
             endGame()
@@ -224,38 +224,50 @@ class GameActivity : AppCompatActivity()  {
         binding.undoBtn.isEnabled = false
 
         // Reveal moves with a delay
-        var moveIndex = 0
-        val handler = Handler(Looper.getMainLooper())
-        val revealRunnable = object : Runnable {
-            override fun run() {
-                if (moveIndex < moves.size) {
-                    val move = moves[moveIndex]
+        if(moves.size > 0){
+            var moveIndex = 0
+            val handler = Handler(Looper.getMainLooper())
+            val revealRunnable = object : Runnable {
+                override fun run() {
+                    if (moveIndex < moves.size) {
+                        val move = moves[moveIndex]
 
-                    // Animate and update the emoji placement
-                    Log.d("RevealMoves", "Revealing move: $move")
-                    locationAdapter.addToLocation(move.first, move.second, move.third)
-                    if(!move.third){
-                        gameManager.getOppEmojisInLocations()[move.second].add(move.first)
+                        // Animate and update the emoji placement
+                        Log.d("RevealMoves", "Revealing move: $move")
+                        locationAdapter.addToLocation(move.first, move.second, move.third)
+                        if (!move.third) {
+                            gameManager.getOppEmojisInLocations()[move.second].add(move.first)
+                        }
+                        gameManager.checkEffects()
+                        gameManager.updateAllEmojis()
+
+                        locationAdapter.updateEmojis()
+
+                        locationAdapter.updateAllTotals(
+                            gameManager.getPlayerTotals(),
+                            gameManager.getOpponentTotals()
+                        )
+
+                        // Proceed to the next move
+                        moveIndex++
+                        handler.postDelayed(this, 1000) // Adjust delay as needed
+                    } else {
+                        // All moves revealed, start the next turn
+                        startNewTurn()
+                        binding.endBtn.isEnabled = true
+                        binding.undoBtn.isEnabled = true
                     }
-                    // Proceed to the next move
-                    moveIndex++
-                    handler.postDelayed(this, 700) // Adjust delay as needed
-                } else {
-                    // All moves revealed, start the next turn
-                    startNewTurn()
-                    binding.endBtn.isEnabled = true
-                    binding.undoBtn.isEnabled = true
                 }
             }
+            handler.post(revealRunnable)
+        } else {
+            startNewTurn()
+            binding.endBtn.isEnabled = true
+            binding.undoBtn.isEnabled = true
         }
 
         // Start revealing moves
-        handler.post(revealRunnable)
-    }
 
-    private fun updateAdapters() {
-        handAdapter.setEmojis(gameManager.getHandEmojis())
-        locationAdapter.setLocationsEmojis(gameManager.getPlayerEmojisInLocations(), gameManager.getOppEmojisInLocations())
     }
 
     fun undoLastAction() {
@@ -415,7 +427,7 @@ class GameActivity : AppCompatActivity()  {
         val binding = DialogEmojiDetailsBinding.inflate(layoutInflater)
         binding.detailEmojiIconTx.text = emoji.icon
         binding.detailEmojiCostTx.text = "${emoji.baseCost}"
-        binding.detailEmojiPowerTx.text = "${emoji.basePower}"
+        binding.detailEmojiPowerTx.text = "${emoji.currentPower}"
         binding.detailEmojiNameTx.text = emoji.name
         binding.detailEmojiDescTx.setText(emoji.description)
 

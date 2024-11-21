@@ -12,7 +12,7 @@ data class Emoji(
     // Modifier that affects total power
     private var modifier: Int = 0
     var currentPower: Int = basePower
-    val propertyMap: MutableMap<String, Boolean> = mutableMapOf()
+    val activeEffects: MutableMap<String, Boolean> = mutableMapOf()
 
     // Getter for modifier
     fun getModifier(): Int = modifier
@@ -24,8 +24,31 @@ data class Emoji(
     }
 
     // Function to apply the modifier and update the current power
-    private fun updateCurrentPower() {
-        currentPower = basePower + modifier
+    fun updateCurrentPower() {
+        var currentTotal = basePower + modifier
+
+        // Apply effects
+        if (activeEffects["Dumpster"] == true) {
+            currentTotal -= 3
+        }
+        if (activeEffects["Castle"] == true) {
+            currentTotal += 2
+        }
+
+        if (activeEffects["Galaxy"] == false) {
+            // TODO: Emoji effects
+
+        }
+
+        if (activeEffects["Arena"] == true) {
+            currentTotal *= 2
+        }
+
+
+
+        currentPower = currentTotal
+
+
     }
 
 }

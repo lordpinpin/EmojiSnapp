@@ -141,7 +141,7 @@ class DataGenerator {
                 Location(
                     icon = "🏟️",
                     name = "Arena",
-                    description = "On reveal: Double the power of all Emojis here."
+                    description = "Ongoing: Double the power of all Emojis here."
                 ),
                 Location(
                     icon = "🌉",

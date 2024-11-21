@@ -1,40 +1,38 @@
 package com.mobdeve.s12.pinpin.lord.emojisnapp
 
-import android.animation.ObjectAnimator
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.mobdeve.s12.pinpin.lord.emojisnapp.databinding.GameLocationBinding
+
+
 class LocationAdapter(
     private var locations: List<Location>,
     private var playerEmojis: MutableList<MutableList<Emoji>>,
     private var oppEmojis: MutableList<MutableList<Emoji>>,
     private var playerTotals: List<Int>,
     private var oppTotals: List<Int>,
-    private val onEmojiClick: (Emoji) -> Unit
+    private val onEmojiClick: (Emoji) -> Unit,
 ) : RecyclerView.Adapter<LocationAdapter.LocationViewHolder>() {
 
+    // List to hold the emoji adapters for player and opponent
+    private var playerEmojiAdapters = mutableListOf<GameEmojiAdapter>()
+    private var oppEmojiAdapters = mutableListOf<GameEmojiAdapter>()
+
     inner class LocationViewHolder(val binding: GameLocationBinding) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(location: Location, playerEmojisAtLocation: MutableList<Emoji>, oppEmojisAtLocation: MutableList<Emoji>) {
+
+        fun bind(location: Location, playerEmojisAtLocation: MutableList<Emoji>, oppEmojisAtLocation: MutableList<Emoji>, playerAdapter: GameEmojiAdapter, oppAdapter: GameEmojiAdapter) {
             binding.locationIconTx.text = location.icon
             binding.locationNameTx.text = location.name
             binding.locationDescTx.text = location.description
             binding.playerScoreTx.text = playerTotals[adapterPosition].toString()
             binding.oppScoreTx.text = oppTotals[adapterPosition].toString()
 
-            // Set up the player emojis RecyclerView
-            val playerEmojiAdapter = GameEmojiAdapter(playerEmojisAtLocation) { emoji ->
-                onEmojiClick(emoji)
-            }
-            binding.playerEmojiRv.adapter = playerEmojiAdapter
-
-            // Set up the opponent emojis RecyclerView
-            val oppEmojiAdapter = GameEmojiAdapter(oppEmojisAtLocation) { emoji ->
-                onEmojiClick(emoji)
-            }
-            binding.oppEmojiRv.adapter = oppEmojiAdapter
+            // Set the emoji adapters for the player and opponent
+            binding.playerEmojiRv.adapter = playerAdapter
+            binding.oppEmojiRv.adapter = oppAdapter
         }
     }
 
@@ -53,12 +51,21 @@ class LocationAdapter(
     }
 
     override fun onBindViewHolder(holder: LocationViewHolder, position: Int) {
-        // Pass the appropriate emoji list for the player and opponent
+        // Get the appropriate emoji lists for the player and opponent
         val location = locations[position]
         val playerEmojisAtLocation = playerEmojis.getOrElse(position) { mutableListOf() }
         val oppEmojisAtLocation = oppEmojis.getOrElse(position) { mutableListOf() }
 
-        holder.bind(location, playerEmojisAtLocation, oppEmojisAtLocation)
+        // Ensure the adapter lists are populated for each location
+        if (playerEmojiAdapters.size <= position) {
+            playerEmojiAdapters.add(GameEmojiAdapter(playerEmojisAtLocation) { emoji -> onEmojiClick(emoji) })
+        }
+        if (oppEmojiAdapters.size <= position) {
+            oppEmojiAdapters.add(GameEmojiAdapter(oppEmojisAtLocation) { emoji -> onEmojiClick(emoji) })
+        }
+
+        // Bind the data to the view holder
+        holder.bind(location, playerEmojisAtLocation, oppEmojisAtLocation, playerEmojiAdapters[position], oppEmojiAdapters[position])
     }
 
     override fun getItemCount(): Int = locations.size
@@ -70,15 +77,27 @@ class LocationAdapter(
             playerEmojis[locationIndex] = newPlayerEmojisAtLocation
             oppEmojis[locationIndex] = newOppEmojisAtLocation
 
+            // Update the emoji adapters for the location
+            playerEmojiAdapters[locationIndex] = GameEmojiAdapter(newPlayerEmojisAtLocation) { emoji -> onEmojiClick(emoji) }
+            oppEmojiAdapters[locationIndex] = GameEmojiAdapter(newOppEmojisAtLocation) { emoji -> onEmojiClick(emoji) }
+
             // Notify the adapter that this specific location has changed
             notifyItemChanged(locationIndex)
+        }
+    }
+
+    fun updateEmojis() {
+        for(i in 0 until 5){
+            // Update the emoji adapters for the location
+            playerEmojiAdapters[i].updateEmoji()
+            oppEmojiAdapters[i].updateEmoji()
         }
     }
 
     fun setLocationsEmojis(newPlayerEmojis: MutableList<MutableList<Emoji>>, newOppEmojis: MutableList<MutableList<Emoji>>) {
         playerEmojis = newPlayerEmojis
         oppEmojis = newOppEmojis
-        notifyDataSetChanged()  // Notify the adapter that the data has changed
+        notifyDataSetChanged()
     }
 
     fun addToLocation(emoji: Emoji, locationIndex: Int, isPlayerMove: Boolean) {
@@ -94,6 +113,13 @@ class LocationAdapter(
         // Add the emoji to the list
         emojiList.add(emoji)
 
+        // Update the emoji adapter
+        if (isPlayerMove) {
+            playerEmojiAdapters[locationIndex] = GameEmojiAdapter(emojiList) { emoji -> onEmojiClick(emoji) }
+        } else {
+            oppEmojiAdapters[locationIndex] = GameEmojiAdapter(emojiList) { emoji -> onEmojiClick(emoji) }
+        }
+
         notifyItemChanged(locationIndex)
     }
 
@@ -105,4 +131,7 @@ class LocationAdapter(
         notifyDataSetChanged()
     }
 
+    fun updateCurrentPower() {
+        notifyDataSetChanged()
+    }
 }

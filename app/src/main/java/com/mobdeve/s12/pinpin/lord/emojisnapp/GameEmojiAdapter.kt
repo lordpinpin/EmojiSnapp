@@ -15,7 +15,7 @@ class GameEmojiAdapter (var emojiList: MutableList<Emoji>, val onEmojiClick: (Em
         fun bind(emoji: Emoji) {
             binding.gameEmojiIconTx.text = emoji.icon
             binding.gameEmojiCostTx.text = emoji.baseCost.toString()
-            binding.gameEmojiPowerTx.text = emoji.basePower.toString()
+            binding.gameEmojiPowerTx.text = emoji.currentPower.toString()
 
             animateEmojiAddition(binding.root)
 
@@ -47,6 +47,12 @@ class GameEmojiAdapter (var emojiList: MutableList<Emoji>, val onEmojiClick: (Em
         emojiList = newEmojis
 
         notifyDataSetChanged()  // Notify the adapter that the data has changed
+    }
+
+    fun updateEmoji(){
+        for(i in 0..emojiList.size){
+            notifyItemChanged(i)
+        }
     }
 
 }

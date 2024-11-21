@@ -35,25 +35,30 @@ class GameManager (
     var ante = 1
     var currentTurn = 0
     private var myGameTurnUuid = UUID.randomUUID().toString();
-    private var gameTurn = GameTurn(myGameTurnUuid)
+    private var gameTurn = GameTurn()
     var currentEnergy = 0
     private var error = ""
 
     init {
-        database.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val recvGameTurn = snapshot.getValue(GameTurn::class.java) ?: return
-                if(recvGameTurn.uuid != myGameTurnUuid) { // change was from other client (not us)
-                    gameTurn.opponentEmojisPlaced.clear()
-                    gameTurn.opponentEmojisPlaced.addAll(recvGameTurn.opponentEmojisPlaced) // other client already puts it on opponentEmojisPlaced
-                    onOpponentTurnComplete()
+        //TODO: Change this to function that determines if playing against human or not.
+        if(!againstBot) {
+            myGameTurnUuid = UUID.randomUUID().toString();
+            gameTurn = GameTurn(myGameTurnUuid)
+            database.addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val recvGameTurn = snapshot.getValue(GameTurn::class.java) ?: return
+                    if (recvGameTurn.uuid != myGameTurnUuid) { // change was from other client (not us)
+                        gameTurn.opponentEmojisPlaced.clear()
+                        gameTurn.opponentEmojisPlaced.addAll(recvGameTurn.opponentEmojisPlaced) // other client already puts it on opponentEmojisPlaced
+                        onOpponentTurnComplete()
+                    }
                 }
-            }
 
-            override fun onCancelled(error: DatabaseError) {
-                Log.e("Firebase", "Error reading currentTurn: ${error.message}")
-            }
-        })
+                override fun onCancelled(error: DatabaseError) {
+                    Log.e("Firebase", "Error reading currentTurn: ${error.message}")
+                }
+            })
+        }
 
         playerDeck.shuffle()
         repeat(5) {
@@ -88,13 +93,27 @@ class GameManager (
         val emojisPlayedThisTurn = gameTurn.playerEmojisPlaced.map { it.first }
 
         // Iterate through each location's emojis
-        for (locationEmojis in playerEmojisInLocations) {
-            // Filter out the emojis that were played this turn
+        for (locationIndex in playerEmojisInLocations.indices) {
+            val locationEmojis = playerEmojisInLocations[locationIndex]
+
+
             val locationTotalPower = locationEmojis
-                .filterNot { emojisPlayedThisTurn.contains(it) }  // Exclude emojis played in the current turn
+                .filterNot { emojisPlayedThisTurn.contains(it) }
                 .sumOf { it.currentPower }
 
-            playerTotals.add(locationTotalPower)
+            // Location: Space Station Effect
+            val spaceStationBonus = if (locations[locationIndex].name == "Space Station") {
+                val otherEmojis = playerEmojisInLocations
+                    .flatMap { it } // Flatten the list to get all emojis
+                    .filterNot { it in locationEmojis }  // Exclude emojis in the current location
+                    .filterNot { emojisPlayedThisTurn.contains(it) }  // Exclude emojis played this turn
+                otherEmojis.size // +1 power for each emoji in other locations
+            } else {
+                0
+            }
+
+            // Add the bonus to the total power for this location
+            playerTotals.add(locationTotalPower + spaceStationBonus)
         }
 
         return playerTotals
@@ -103,11 +122,28 @@ class GameManager (
     fun getOpponentTotals(): List<Int> {
         val opponentTotals = mutableListOf<Int>()
 
-        // Iterate through each location's emojis for the opponent
-        for (locationEmojis in oppEmojisInLocations) {
-            // Sum up the currentPower for the opponent's emojis in this location
+        // Get the list of player emojis that were played in the current turn
+        val emojisPlayedThisTurn = gameTurn.playerEmojisPlaced.map { it.first }
+
+        // Iterate through each location's emojis
+        for (locationIndex in oppEmojisInLocations.indices) {
+            val locationEmojis = oppEmojisInLocations[locationIndex]
+
+
             val locationTotalPower = locationEmojis.sumOf { it.currentPower }
-            opponentTotals.add(locationTotalPower)
+
+            // Location: Space Station Effect
+            val spaceStationBonus = if (locations[locationIndex].name == "Space Station") {
+                val otherEmojis = oppEmojisInLocations
+                    .flatMap { it } // Flatten the list to get all emojis
+                    .filterNot { it in locationEmojis }  // Exclude emojis in the current location
+                otherEmojis.size // +1 power for each emoji in other locations
+            } else {
+                0
+            }
+
+            // Add the bonus to the total power for this location
+            opponentTotals.add(locationTotalPower + spaceStationBonus)
         }
 
         return opponentTotals
@@ -143,8 +179,9 @@ class GameManager (
             //TODO: Send to opponent if you ante'd
             //TODO: Check if opponent ante'd
             //TODo: Add opp moves to GameTurn.
+            onOpponentTurnComplete()
         }
-        onOpponentTurnComplete()
+
         return false
     }
 
@@ -190,12 +227,6 @@ class GameManager (
             }
             getOverallWinner()
         }
-
-
-
-
-
-        // Invoke the callback after the turn setup is complete
         onComplete()
     }
 
@@ -205,6 +236,51 @@ class GameManager (
         } else {
             return gameTurn.getOppThenPlayer()
         }
+    }
+
+    fun checkEffects() {
+        // Iterate over all player emojis in each location
+        playerEmojisInLocations.forEachIndexed { index, emojiList ->
+            val location = locations[index]
+            emojiList.forEach { emoji ->
+                // Reset effects for the emoji
+                emoji.activeEffects.clear()
+
+                // Apply location-specific effects
+                when (location.name) {
+                    "Dumpster" -> emoji.activeEffects["Dumpster"] = true
+                    "Castle" -> emoji.activeEffects["Castle"] = true
+                    "Galaxy" -> emoji.activeEffects["Galaxy"] = true
+                    "Arena" -> emoji.activeEffects["Castle"] = true
+                }
+            }
+        }
+
+        // Iterate over all opponent emojis in each location
+        oppEmojisInLocations.forEachIndexed { index, emojiList ->
+            val location = locations[index]
+            emojiList.forEach { emoji ->
+                // Reset effects for the emoji
+                emoji.activeEffects.clear()
+
+                // Apply location-specific effects
+                when (location.name) {
+                    "Dumpster" -> emoji.activeEffects["Dumpster"] = true
+                    "Castle" -> emoji.activeEffects["Castle"] = true
+                    "Galaxy" -> emoji.activeEffects["Galaxy"] = true
+                    "Arena" -> emoji.activeEffects["Castle"] = true
+                }
+            }
+        }
+    }
+
+    fun updateAllEmojis() {
+        // Update current power of all player emojis
+        playerEmojisInLocations.flatten().forEach { it.updateCurrentPower() }
+        // Update current power of all opponent emojis
+        oppEmojisInLocations.flatten().forEach { it.updateCurrentPower() }
+
+
     }
 
     fun getLocationWinner(locationIndex: Int): String {
