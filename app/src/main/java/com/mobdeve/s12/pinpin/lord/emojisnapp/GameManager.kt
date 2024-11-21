@@ -206,10 +206,10 @@ class GameManager (
         currentTurn++
         currentEnergy = currentTurn
         gameTurn.resetTurn()
-        playerDeck.draw()?.let { emojisInHand.add(it) }
+        if(emojisInHand.size < 8) { playerDeck.draw()?.let { emojisInHand.add(it) } }
 
         if (againstBot) {
-            oppDeck.draw()?.let { botHand.add(it) }
+            if(botHand.size < 8) { oppDeck.draw()?.let { botHand.add(it) } }
             getBotMoves()
         } else {
 
@@ -282,6 +282,7 @@ class GameManager (
 
 
     }
+
 
     fun getLocationWinner(locationIndex: Int): String {
         // Get total power for player and opponent at this location
