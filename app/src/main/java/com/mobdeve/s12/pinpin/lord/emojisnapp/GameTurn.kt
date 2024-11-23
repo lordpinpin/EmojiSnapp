@@ -45,6 +45,17 @@ class GameTurn () {
         return (opponentMoves + playerMoves).toMutableList()
     }
 
+    fun removePlayerMove(move: Triple<Emoji, Int, Boolean>) {
+        playerEmojisPlaced.removeAll { it.first == move.first && it.second == move.second }
+        Log.d("GameTurn", "Player move removed: $move")
+    }
+
+    // Method to remove a specific opponent move (identified by the Triple)
+    fun removeOppMove(move: Triple<Emoji, Int, Boolean>) {
+        opponentEmojisPlaced.removeAll { it.first == move.first && it.second == move.second }
+        Log.d("GameTurn", "Opponent move removed: $move")
+    }
+
     // Method to clear the current turn data
     fun resetPlayerTurn() {
         playerEmojisPlaced.clear()

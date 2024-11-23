@@ -30,6 +30,7 @@ class GameActivity : AppCompatActivity()  {
     private var savedTurnState: GameState? = null
     private var currentEmojiBeingDragged: Emoji? = null // Track the emoji being dragged
     private val overlayViews = mutableListOf<View>()
+    private var activeDialog: AlertDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -102,8 +103,10 @@ class GameActivity : AppCompatActivity()  {
     }
 
     private fun startNewTurn() {
+        gameManager.checkTornado()
+
         if(gameManager.currentTurn < 8) {
-            gameManager.nextTurn {
+            gameManager.nextTurn { draw ->
                 val emojisInHand = gameManager.getHandEmojis()
                 val playerEmojisInLocations = gameManager.getPlayerEmojisInLocations()
                 val oppEmojisInLocations = gameManager.getOppEmojisInLocations()
@@ -128,7 +131,9 @@ class GameActivity : AppCompatActivity()  {
                 binding.energyTx.text = "Energy: " + gameManager.currentEnergy.toString()
                 binding.anteTx.text = gameManager.ante.toString()
 
-                handAdapter.notifyItemInserted(emojisInHand.size - 1)
+                if(draw) {
+                    handAdapter.notifyItemInserted(emojisInHand.size - 1)
+                }
 
 
                 binding.locationRv.post {
@@ -146,64 +151,91 @@ class GameActivity : AppCompatActivity()  {
     }
 
     private fun endGame() {
-        val result = gameManager.getFinalResult()
 
-        // First, add a delay before showing the dialog
-        val dialogDelayMillis = 2000L
-        Handler(Looper.getMainLooper()).postDelayed({
-            when (result) {
-                "Win" -> {
-                    showWinResultDialog(gameManager.ante * 2) // Show win dialog
-                }
-                "Loss" -> {
-                    showLoseResultDialog(gameManager.ante * 2) // Show lose dialog
-                }
-                "Draw" -> {
-                    showDrawResultDialog() // Show draw dialog
-                }
-            }
 
-            // After showing the dialog, add a delay before exiting the activity
-            val exitDelayMillis = 4000L
+        var volcanoedEmojis = gameManager.checkVolcanoEffect()
+        Log.d("GameActivity", "Volcanoed Emojis: $volcanoedEmojis")
+        locationAdapter.destroyEmojis(volcanoedEmojis) {
+
+            gameManager.updateAllEmojis()
+
+            locationAdapter.updateEmojis()
+
+
+            locationAdapter.updateAllTotals(
+                gameManager.getPlayerTotals(),
+                gameManager.getOpponentTotals()
+            )
+
+            binding.endBtn.isEnabled = false
+            binding.undoBtn.isEnabled = false
+
+
+
+
+            // First, add a delay before showing the dialog
+            val dialogDelayMillis = 2000L
             Handler(Looper.getMainLooper()).postDelayed({
-                finish() // Exit the activity
-            }, exitDelayMillis)
+                Log.d("GameActivity ","Getting final result.")
+                val result = gameManager.getFinalResult()
 
-        }, dialogDelayMillis)
+                when (result) {
+                    "Win" -> {
+                        showWinResultDialog(gameManager.ante * 2) // Show win dialog
+                    }
+
+                    "Loss" -> {
+                        showLoseResultDialog(gameManager.ante * 2) // Show lose dialog
+                    }
+
+                    "Draw" -> {
+                        showDrawResultDialog() // Show draw dialog
+                    }
+                }
+
+                Handler(Looper.getMainLooper()).postDelayed({
+                    activeDialog?.dismiss()
+                    activeDialog = null // Clear the reference
+                    finish()
+                }, 3000L) // Adjust delay as needed
+
+            }, dialogDelayMillis)
+        }
     }
 
+    // When player chooses to retreat
     private fun retreatGame() {
 
         gameManager.forfeitGame()
 
         val dialogDelayMillis = 2000L
         Handler(Looper.getMainLooper()).postDelayed({
-            showEscapeResultDialog(gameManager.ante) // Show lose dialog
+            showEscapeResultDialog(gameManager.ante) // Show retreat dialog
 
 
-            // After showing the dialog, add a delay before exiting the activity
-            val exitDelayMillis = 4000L
             Handler(Looper.getMainLooper()).postDelayed({
-                finish() // Exit the activity
-            }, exitDelayMillis)
+                activeDialog?.dismiss()
+                activeDialog = null // Clear the reference
+                finish()
+            }, 3000L)
 
         }, dialogDelayMillis)
     }
 
+    // When opponent chooses to flee.
     private fun fleedGame() {
 
         gameManager.forfeitGame()
 
         val dialogDelayMillis = 2000L
         Handler(Looper.getMainLooper()).postDelayed({
-            showFleeResultDialog(gameManager.ante) // Show lose dialog
+            showFleeResultDialog(gameManager.ante) // Show flee dialog
 
-
-            // After showing the dialog, add a delay before exiting the activity
-            val exitDelayMillis = 4000L
             Handler(Looper.getMainLooper()).postDelayed({
-                finish() // Exit the activity
-            }, exitDelayMillis)
+                activeDialog?.dismiss()
+                activeDialog = null // Clear the reference
+                finish()
+            }, 3000L)
 
         }, dialogDelayMillis)
     }
@@ -238,19 +270,73 @@ class GameActivity : AppCompatActivity()  {
                         if (!move.third) {
                             gameManager.getOppEmojisInLocations()[move.second].add(move.first)
                         }
-                        gameManager.checkEffects()
-                        gameManager.updateAllEmojis()
+                        gameManager.checkOnPlayEffects(move.first, move.second, move.third)
 
-                        locationAdapter.updateEmojis()
+                        when (move.first.name) {
+                            "Clown" -> {
+                                val clownHandler = Handler(Looper.getMainLooper())
+                                val delayMillis: Long = 1000 // Delay in milliseconds (e.g., 1 second)
 
-                        locationAdapter.updateAllTotals(
-                            gameManager.getPlayerTotals(),
-                            gameManager.getOpponentTotals()
-                        )
+                                clownHandler.postDelayed({
+                                    // This will be executed after the delay
+                                    gameManager.checkClown(move.first, move.second, move.third)
 
-                        // Proceed to the next move
-                        moveIndex++
-                        handler.postDelayed(this, 1000) // Adjust delay as needed
+                                    // Update the locationAdapter after the Clown effect
+                                    locationAdapter.setLocationsEmojis(
+                                        gameManager.getPlayerEmojisInLocations(),
+                                        gameManager.getOppEmojisInLocations()
+                                    )
+                                }, delayMillis)
+                            }
+                            "Sparkles" -> {
+                                val sparksHandler = Handler(Looper.getMainLooper())
+                                val delayMillis: Long = 1000 // Delay in milliseconds (e.g., 1 second)
+
+                                sparksHandler.postDelayed({
+                                    // This will be executed after the delay
+                                    gameManager.checkSparks(move.first, move.second, move.third)
+
+                                    // Update the locationAdapter after the Clown effect
+                                    locationAdapter.setLocationsEmojis(
+                                        gameManager.getPlayerEmojisInLocations(),
+                                        gameManager.getOppEmojisInLocations()
+                                    )
+                                }, delayMillis)
+                            }
+                            "Robot" -> {
+                                val sparksHandler = Handler(Looper.getMainLooper())
+                                val delayMillis: Long = 1000 // Delay in milliseconds (e.g., 1 second)
+
+                                sparksHandler.postDelayed({
+                                    // This will be executed after the delay
+                                    gameManager.checkRobot(move.first, move.second, move.third)
+
+                                    // Update the locationAdapter after the Clown effect
+                                    locationAdapter.setLocationsEmojis(
+                                        gameManager.getPlayerEmojisInLocations(),
+                                        gameManager.getOppEmojisInLocations()
+                                    )
+                                }, delayMillis)
+                            }
+                        }
+
+                        var destroyed = gameManager.checkDestruction(move.first, move.second, move.third)
+                        locationAdapter.destroyEmojis(destroyed) {
+                            gameManager.checkEffects()
+                            gameManager.updateAllEmojis()
+
+                            locationAdapter.updateEmojis()
+
+                            locationAdapter.updateAllTotals(
+                                gameManager.getPlayerTotals(),
+                                gameManager.getOpponentTotals()
+                            )
+                            gameManager.removeMove(move)
+
+                            // Proceed to the next move
+                            moveIndex++
+                            handler.postDelayed(this, 1000) // Adjust delay as needed
+                        }
                     } else {
                         // All moves revealed, start the next turn
                         startNewTurn()
@@ -276,7 +362,6 @@ class GameActivity : AppCompatActivity()  {
             runOnUiThread {
                 handAdapter.setEmojis(savedTurnState!!.emojisInHand.toMutableList())
             }
-
             // Update the location adapter with the player and opponent emojis from the saved turn state
             locationAdapter.setLocationsEmojis(
                 savedTurnState!!.playerEmojisInLocations.toMutableList(),
@@ -285,20 +370,17 @@ class GameActivity : AppCompatActivity()  {
             gameManager.undoToPreviousState(savedTurnState!!)
             binding.energyTx.text = "Energy: " + gameManager.currentEnergy.toString()
             updateEmojiOverlays()
-        } else {
-            Toast.makeText(this, "No actions to undo", Toast.LENGTH_SHORT).show()
+
+            Log.d("GameState", "Saved State: $savedTurnState")
         }
     }
 
     private fun updateEmojiOverlays() {
         val rootLayout = findViewById<FrameLayout>(android.R.id.content)
+        val density = resources.displayMetrics.density // Device density for dp-to-pixel conversion
         binding.handRv.post {
             overlayViews.forEach { rootLayout.removeView(it) }
             overlayViews.clear()
-
-            // Get the global position of the RecyclerView
-            val recyclerViewRect = Rect()
-            binding.handRv.getGlobalVisibleRect(recyclerViewRect)
 
             // Loop through all visible items in the RecyclerView
             for (i in 0 until binding.handRv.childCount) {
@@ -314,9 +396,9 @@ class GameActivity : AppCompatActivity()  {
                 val itemRect = Rect()
                 itemView.getGlobalVisibleRect(itemRect)
 
-                // Adjust the position to make it relative to the root layout
-                val offsetX = itemRect.left + 22
-                val offsetY = itemRect.top - 58
+                // Convert dp offsets to pixels
+                val offsetX = itemRect.left + (8 * density).toInt() // Horizontal adjustment in dp
+                val offsetY = itemRect.top - (22 * density).toInt()  // Vertical adjustment in dp
 
                 // Create an overlay FrameLayout
                 val overlay = FrameLayout(this).apply {
@@ -339,14 +421,11 @@ class GameActivity : AppCompatActivity()  {
                 // Add touch listener to enable dragging
                 overlay.setOnTouchListener { _, event ->
                     when (event.action) {
-                        MotionEvent.ACTION_DOWN -> {
-                            // Optional: handle touch-down if needed
-                        }
                         MotionEvent.ACTION_MOVE -> {
                             // Dynamically move the overlay as the user drags it
                             val params = overlay.layoutParams as FrameLayout.LayoutParams
-                            params.leftMargin = (event.rawX - overlay.width / 2).toInt() + 15
-                            params.topMargin = (event.rawY - overlay.height / 2).toInt() - 65
+                            params.leftMargin = (event.rawX - overlay.width / 2).toInt()
+                            params.topMargin = ((event.rawY - overlay.height / 2) - (25 * density)).toInt()
                             overlay.layoutParams = params
                         }
                         MotionEvent.ACTION_UP -> {
@@ -377,11 +456,12 @@ class GameActivity : AppCompatActivity()  {
         }
     }
 
+
     private fun handleDrop(x: Float, y: Float) {
         // Check which location the emoji was dropped on
         val locationIndex = getLocationIndexAtPosition(x, y)
         if (locationIndex != -1) {
-            if (currentEmojiBeingDragged?.let { gameManager.checkIfValidMove(it, locationIndex) } == true) {
+            if (currentEmojiBeingDragged?.let { gameManager.checkIfValidMove(it, locationIndex, isBot = false) } == true) {
                 // Add emoji to the corresponding location (this part is game-specific)
                 gameManager.moveEmojiToLocation(currentEmojiBeingDragged!!, locationIndex, true)
 
@@ -391,6 +471,8 @@ class GameActivity : AppCompatActivity()  {
                 gameManager.recordPlayerTurn(currentEmojiBeingDragged!!.copy(), locationIndex)
                 binding.energyTx.text = "Energy: " + gameManager.currentEnergy.toString()
                 updateEmojiOverlays()
+
+                Log.d("GameState", "Saved State: $savedTurnState")
             } else {
                 showInvalidMoveDialog(gameManager.getErrorMessage())
             }
@@ -453,60 +535,55 @@ class GameActivity : AppCompatActivity()  {
         dialog.show()
     }
 
-    private fun showWinResultDialog(points : Int) {
-        val dialog = AlertDialog.Builder(this)
-            .setTitle("Congratulations.")
-            .setMessage("You won $points points!")
-            .setPositiveButton("OK") { dialog, _ -> dialog.dismiss()
-                                                         finish() }
+    private fun showWinResultDialog(prize: Int) {
+        activeDialog = AlertDialog.Builder(this)
+            .setTitle("You Win!")
+            .setMessage("Congratulations! You earned $prize points.")
+            .setCancelable(false)
             .create()
-
-        dialog.show()
+        activeDialog?.show()
     }
 
-    private fun showLoseResultDialog(points : Int) {
-        val dialog = AlertDialog.Builder(this)
-            .setTitle("Unfortunate.")
-            .setMessage("You lost $points points!")
-            .setPositiveButton("OK") { dialog, _ -> dialog.dismiss()
-                                                         finish() }
+    private fun showLoseResultDialog(prize: Int) {
+        activeDialog = AlertDialog.Builder(this)
+            .setTitle("You Lose!")
+            .setMessage("Better luck next time! You lost $prize points.")
+            .setCancelable(false)
             .create()
+        activeDialog?.show()
+    }
 
-        dialog.show()
+    private fun showDrawResultDialog() {
+        activeDialog = AlertDialog.Builder(this)
+            .setTitle("Draw!")
+            .setMessage("It's a draw! No points gained or lost.")
+            .setCancelable(false)
+            .create()
+        activeDialog?.show()
     }
 
     private fun showEscapeResultDialog(points : Int) {
         var doublePoints = points * 2
-        val dialog = AlertDialog.Builder(this)
+        activeDialog =  AlertDialog.Builder(this)
             .setTitle("Forfeited.")
             .setMessage("You lost $points instead of $doublePoints points.")
             .setPositiveButton("OK") { dialog, _ -> dialog.dismiss()
                 finish() }
             .create()
 
-        dialog.show()
+        activeDialog?.show()
     }
 
     private fun showFleeResultDialog(points : Int) {
         var doublePoints = points * 2
-        val dialog = AlertDialog.Builder(this)
+        activeDialog =  AlertDialog.Builder(this)
             .setTitle("Opponent flees!")
             .setMessage("You gain $points instead of $doublePoints points.")
             .setPositiveButton("OK") { dialog, _ -> dialog.dismiss()
                 finish() }
             .create()
 
-        dialog.show()
+        activeDialog?.show()
     }
 
-    private fun showDrawResultDialog() {
-        val dialog = AlertDialog.Builder(this)
-            .setTitle("A TIE!")
-            .setMessage("No points gained or lost!")
-            .setPositiveButton("OK") { dialog, _ -> dialog.dismiss()
-                                                         finish() }
-            .create()
-
-        dialog.show()
-    }
 }

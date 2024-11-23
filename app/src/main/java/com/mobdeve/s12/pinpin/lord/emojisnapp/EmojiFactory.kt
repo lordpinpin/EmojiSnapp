@@ -50,7 +50,7 @@ object EmojiFactory {
                 unlockThreshold = 0
             ),
             Emoji("🔥", "Fire",
-                description = "On Play: Destroys one of your own Emojis already placed here.",
+                description = "On Play: Destroy the first other Emoji you placed here.",
                 baseCost = 3,
                 basePower = 5,
                 unlockThreshold = 0
@@ -58,17 +58,11 @@ object EmojiFactory {
             Emoji("💯", "Hundred Points",
                 description = "On Play: All odd-Power Emojis get -1 power, gain +1 for each Emoji affected.",
                 baseCost = 5,
-                basePower = 10,
-                unlockThreshold = 0
-            ),
-            Emoji("🚀", "Rocket",
-                description = "Trigger: When an Emoji is played here, move to another location.",
-                baseCost = 2,
-                basePower = 5,
+                basePower = 6,
                 unlockThreshold = 0
             ),
             Emoji("🌟", "Glowing Star",
-                description = "Ongoing: Give all your Emojis in this location +2 power.",
+                description = "Give all your Emojis in this location +2 power.",
                 baseCost = 5,
                 basePower = 3,
                 unlockThreshold = 0
@@ -80,13 +74,13 @@ object EmojiFactory {
                 unlockThreshold = 0
             ),
             Emoji("🧩", "Puzzle Piece",
-                description = "Condition: Can only be played as the last emoji in a location.",
+                description = "Can only be played as the last emoji in a location.",
                 baseCost = 3,
                 basePower = 9,
                 unlockThreshold = 0
             ),
             Emoji("🎯", "Bullseye",
-                description = "Condition: Can only be played in the middle location.",
+                description = "Can only be played if you did not play any Emojis last turn.",
                 baseCost = 8,
                 basePower = 25,
                 unlockThreshold = 0
@@ -110,27 +104,28 @@ object EmojiFactory {
                 unlockThreshold = 0
             ),
             Emoji("💪", "Strong Arm",
-                description = "Trigger: If this card gains additional Power, double it.",
+                description = "Double all effects on this Emoji.",
                 baseCost = 4,
                 basePower = 4,
                 unlockThreshold = 0
             ),
             Emoji("😇", "Angel Face",
-                description = "Ongoing: Your Emojis cannot lose power and regains any lost power.",
+                description = "Your Emojis cannot lose power and regains any lost power.",
                 baseCost = 3,
                 basePower = 3,
                 unlockThreshold = 5
             ),
             Emoji("🤖", "Robot",
-                description = "On Play: Create a Robot with no abilities on each location.",
+                description = "On Play: Create a copy of itself in the same location.",
                 baseCost = 4,
-                basePower = 2,
+                basePower = 4,
                 unlockThreshold = 10
             ),
+
             Emoji("🦄", "Unicorn",
                 description = "On Play: If this is played on a location without any other Emojis, gain +10 power",
                 baseCost = 6,
-                basePower = 5,
+                basePower = 4,
                 unlockThreshold = 15
             ),
             Emoji("👽", "Alien",
@@ -146,7 +141,7 @@ object EmojiFactory {
                 unlockThreshold = 25
             ),
             Emoji("🐉", "Dragon",
-                description = "On Play: Opposing Emojis get -1 power.",
+                description = "Opposing Emojis get -1 power.",
                 baseCost = 5,
                 basePower = 9,
                 unlockThreshold = 30

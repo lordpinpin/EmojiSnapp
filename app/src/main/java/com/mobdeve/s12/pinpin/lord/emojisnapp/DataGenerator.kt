@@ -15,12 +15,12 @@ class DataGenerator {
             data.add(EmojiFactory.getEmoji("🎉", "Party Popper"))
             data.add(EmojiFactory.getEmoji("🔥", "Fire"))
             data.add(EmojiFactory.getEmoji("💯", "Hundred Points"))
-            data.add(EmojiFactory.getEmoji("🚀", "Rocket"))
+            data.add(EmojiFactory.getEmoji("✨", "Sparkles"))
             data.add(EmojiFactory.getEmoji("🌟", "Glowing Star"))
             data.add(EmojiFactory.getEmoji("🍀", "Four Leaf Clover"))
             data.add(EmojiFactory.getEmoji("🧩", "Puzzle Piece"))
             data.add(EmojiFactory.getEmoji("🎯", "Bullseye"))
-            data.add(EmojiFactory.getEmoji("✨", "Sparkles"))
+            data.add(EmojiFactory.getEmoji("\uD83E\uDD16", "Robot"))
             data.add(EmojiFactory.getEmoji("🕊️", "Peace Dove"))
             data.add(EmojiFactory.getEmoji("🌈", "Rainbow"))
             data.add(EmojiFactory.getEmoji("💪", "Strong Arm"))
@@ -41,7 +41,7 @@ class DataGenerator {
             data.add(EmojiFactory.getEmoji("🎉", "Party Popper"))
             data.add(EmojiFactory.getEmoji("🔥", "Fire"))
             data.add(EmojiFactory.getEmoji("💯", "Hundred Points"))
-            data.add(EmojiFactory.getEmoji("🚀", "Rocket"))
+            data.add(EmojiFactory.getEmoji("\uD83E\uDD16", "Robot"))
             data.add(EmojiFactory.getEmoji("🌟", "Glowing Star"))
             data.add(EmojiFactory.getEmoji("🍀", "Four Leaf Clover"))
             data.add(EmojiFactory.getEmoji("🧩", "Puzzle Piece"))
@@ -67,7 +67,7 @@ class DataGenerator {
             data.add(EmojiFactory.getEmojiCopy("Party Popper"))
             data.add(EmojiFactory.getEmojiCopy("Fire"))
             data.add(EmojiFactory.getEmojiCopy("Hundred Points"))
-            data.add(EmojiFactory.getEmojiCopy("Rocket"))
+            data.add(EmojiFactory.getEmojiCopy("Sparkles"))
             data.add(EmojiFactory.getEmojiCopy("Glowing Star"))
             data.add(EmojiFactory.getEmojiCopy("Four Leaf Clover"))
             data.add(EmojiFactory.getEmojiCopy("Puzzle Piece"))
@@ -93,7 +93,7 @@ class DataGenerator {
             data.add(EmojiFactory.getEmojiCopy("Party Popper"))
             data.add(EmojiFactory.getEmojiCopy("Fire"))
             data.add(EmojiFactory.getEmojiCopy("Hundred Points"))
-            data.add(EmojiFactory.getEmojiCopy("Rocket"))
+            data.add(EmojiFactory.getEmojiCopy("Robot"))
             data.add(EmojiFactory.getEmojiCopy("Glowing Star"))
             data.add(EmojiFactory.getEmojiCopy("Four Leaf Clover"))
             data.add(EmojiFactory.getEmojiCopy("Puzzle Piece"))
@@ -106,7 +106,7 @@ class DataGenerator {
             return data
         }
 
-        fun loadLocations(): ArrayList<Location> {
+        fun loadLocations(repeatable: Boolean = false, numberOfLocations: Int = 5): ArrayList<Location> {
             val allLocations = arrayListOf(
                 Location(
                     icon = "🚯",
@@ -126,7 +126,7 @@ class DataGenerator {
                 Location(
                     icon = "🏰",
                     name = "Castle",
-                    description = "Ongoing: All Emojis here gain +2 power."
+                    description = "All Emojis here gain +2 power."
                 ),
                 Location(
                     icon = "🚀",
@@ -141,28 +141,69 @@ class DataGenerator {
                 Location(
                     icon = "🏟️",
                     name = "Arena",
-                    description = "Ongoing: Double the power of all Emojis here."
-                ),
-                Location(
-                    icon = "🌉",
-                    name = "Bridge",
-                    description = "On play: Move one Emoji from here to another location."
+                    description = "Double the power of all Emojis here."
                 ),
                 Location(
                     icon = "🌌",
                     name = "Galaxy",
-                    description = "Ongoing: Emojis here cannot be affected by abilities."
+                    description = "Emojis here cannot be affected by Passive abilities."
                 ),
                 Location(
                     icon = "💡",
                     name = "Idea Lab",
-                    description = "On play: Draw a card from your deck."
+                    description = "After playing first Emoji, draw a card from your deck."
+                ),
+                Location(
+                    icon = "🌀",
+                    name = "Tornado",
+                    description = "All Emojis here lose 1 power at the start of each turn."
+                ),
+            )
+
+            // If locations can repeat, shuffle and select from all available locations
+            val selectedLocations = if (repeatable) {
+                // Pick random locations allowing repeats
+                ArrayList((1..numberOfLocations).map { allLocations.random() })
+            } else {
+                // Shuffle and pick distinct 5 locations
+                allLocations.shuffle()
+                ArrayList(allLocations.take(numberOfLocations))
+            }
+
+            return selectedLocations
+        }
+
+        fun loadVolcanoes(): List<Location> {
+            val volcanoes = arrayListOf(
+                Location(
+                    icon = "🌋",
+                    name = "Volcano 1",
+                    description = "Destroy the three weakest Emojis at the end of the game."
+                ),
+                Location(
+                    icon = "🌋",
+                    name = "Volcano 2",
+                    description = "Destroy the three weakest Emojis at the end of the game."
+                ),
+                Location(
+                    icon = "🌋",
+                    name = "Volcano 3",
+                    description = "Destroy the three weakest Emojis at the end of the game."
+                ),
+                Location(
+                    icon = "🌋",
+                    name = "Volcano 4",
+                    description = "Destroy the three weakest Emojis at the end of the game."
+                ),
+                Location(
+                    icon = "🌋",
+                    name = "Volcano 5",
+                    description = "Destroy the three weakest Emojis at the end of the game."
                 )
             )
 
-            // Shuffle and pick 5 random locations
-            allLocations.shuffle()
-            return ArrayList(allLocations.take(5))
+            // Returning the list of volcano locations
+            return volcanoes
         }
 
         fun loadFiveEmojis() : List<Emoji> {

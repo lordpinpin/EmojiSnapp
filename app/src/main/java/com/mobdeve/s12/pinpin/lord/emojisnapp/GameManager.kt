@@ -26,7 +26,7 @@ class GameManager (
     private val tieBreakerRef = database.child("tieBreakerResult")
 
     private val emojisInHand = mutableListOf<Emoji>()
-    private val locations : List<Location> = DataGenerator.loadLocations()
+    private val locations : List<Location> = DataGenerator.loadLocations(true)
     private val playerEmojisInLocations = mutableListOf<MutableList<Emoji>>()
     private val oppEmojisInLocations = mutableListOf<MutableList<Emoji>>()
     private val botHand = mutableListOf<Emoji>()
@@ -37,7 +37,9 @@ class GameManager (
     private var myGameTurnUuid = UUID.randomUUID().toString();
     private var gameTurn = GameTurn()
     var currentEnergy = 0
+    var botEnergy = 0
     private var error = ""
+    private var playedLastTurn = false;
 
     init {
         //TODO: Change this to function that determines if playing against human or not.
@@ -68,6 +70,7 @@ class GameManager (
         Log.d("EmojisinHand", emojisInHand.toString())
 
         if(againstBot){
+            botHand.shuffle()
             repeat(5) {
                 oppDeck.draw()?.let { botHand.add(it) }
             }
@@ -121,9 +124,6 @@ class GameManager (
 
     fun getOpponentTotals(): List<Int> {
         val opponentTotals = mutableListOf<Int>()
-
-        // Get the list of player emojis that were played in the current turn
-        val emojisPlayedThisTurn = gameTurn.playerEmojisPlaced.map { it.first }
 
         // Iterate through each location's emojis
         for (locationIndex in oppEmojisInLocations.indices) {
@@ -202,11 +202,19 @@ class GameManager (
         }
     }
 
-    fun nextTurn(onComplete: () -> Unit) {
+
+
+    fun nextTurn(onComplete: (draw : Boolean) -> Unit) {
         currentTurn++
         currentEnergy = currentTurn
         gameTurn.resetTurn()
-        if(emojisInHand.size < 8) { playerDeck.draw()?.let { emojisInHand.add(it) } }
+        var successfulDraw = true
+        if (emojisInHand.size < 8) {
+            playerDeck.draw()?.let { emojisInHand.add(it) }
+        }
+        else {
+            successfulDraw = false
+        }
 
         if (againstBot) {
             if(botHand.size < 8) { oppDeck.draw()?.let { botHand.add(it) } }
@@ -227,14 +235,16 @@ class GameManager (
             }
             getOverallWinner()
         }
-        onComplete()
+        onComplete(successfulDraw)
     }
 
     fun getMovesInOrder(): MutableList<Triple<Emoji, Int, Boolean>> {
-        if(getOverallWinner() == "Player"){
-            return gameTurn.getPlayerThenOpp()
-        } else {
-            return gameTurn.getOppThenPlayer()
+        playedLastTurn = gameTurn.playerEmojisPlaced.isNotEmpty()
+
+        return when (getOverallWinner()) {
+            "Player" -> gameTurn.getPlayerThenOpp()
+            "Opponent" -> gameTurn.getOppThenPlayer()
+            else -> gameTurn.getPlayerThenOpp()
         }
     }
 
@@ -253,6 +263,72 @@ class GameManager (
                     "Galaxy" -> emoji.activeEffects["Galaxy"] = true
                     "Arena" -> emoji.activeEffects["Castle"] = true
                 }
+
+                when (emoji.name) {
+                    "Hundred Points" -> {
+                        // Hundred Points: All odd-Power Emojis get -1 power, gain +1 for odd-Power Emoji.
+                        var affected = 0
+
+                        playerEmojisInLocations[index].forEach { e ->
+                            if (e.basePower % 2 != 0) {
+                                e.activeEffects["Hundred Points"] = true
+                                affected++
+                            }
+                        }
+                        oppEmojisInLocations[index].forEach { e ->
+                            if (e.basePower % 2 != 0) {
+                                e.activeEffects["Hundred Points"] = true
+                                affected++
+                            }
+                        }
+                        emoji.additive = affected
+                    }
+                    "Glowing Star" -> {
+                        // Glowing Star: Give all your Emojis in this location +2 power.
+                        emojiList.forEach { e ->
+                            e.activeEffects["Glowing Star"] = true
+                        }
+                    }
+                    "Rainbow" -> {
+                        // Rainbow: All your other Emojis gain +1 power.
+                        val allOtherEmojis = mutableListOf<Emoji>()
+
+                        // Loop through all locations
+                        locations.forEachIndexed { index, _ ->
+                            val otherEmojis = playerEmojisInLocations[index]
+                            allOtherEmojis.addAll(otherEmojis)
+                        }
+
+                        val allOtherExceptRainbow = allOtherEmojis.filter { it.name == "Rainbow" }
+
+                        // Now, iterate over all the other emojis and apply the Rainbow effect
+                        allOtherExceptRainbow.forEach { e ->
+                            e.activeEffects["Rainbow"] = true
+                        }
+                    }
+                    "Dragon" -> {
+                        // Dragon: Opposing Emojis get -1 power.
+                        val opposingList = oppEmojisInLocations[index]
+                        opposingList.forEach { e ->
+                            e.activeEffects["Dragon"] = true
+                        }
+                    }
+                    "Angel Face" -> {
+                        // Rainbow: All your other Emojis gain +1 power.
+                        val allOtherEmojis = mutableListOf<Emoji>()
+
+                        // Loop through all locations
+                        locations.forEachIndexed { index, _ ->
+                            val otherEmojis = playerEmojisInLocations[index]
+                            allOtherEmojis.addAll(otherEmojis)
+                        }
+
+                        // Now, iterate over all the other emojis and apply the Rainbow effect
+                        allOtherEmojis.forEach { e ->
+                            e.activeEffects["Angel Face"] = true
+                        }
+                    }
+                }
             }
         }
 
@@ -270,7 +346,347 @@ class GameManager (
                     "Galaxy" -> emoji.activeEffects["Galaxy"] = true
                     "Arena" -> emoji.activeEffects["Castle"] = true
                 }
+
+                when (emoji.name) {
+                    "Hundred Points" -> {
+                        // Hundred Points: All odd-Power Emojis get -1 power, gain +1 for each Emoji affected.
+                        var affected = 0
+
+                        playerEmojisInLocations[index].forEach { e ->
+                            if (e.basePower % 2 != 0) {
+                                e.activeEffects["Hundred Points"] = true
+                                affected++
+                            }
+                        }
+                        oppEmojisInLocations[index].forEach { e ->
+                            if (e.basePower % 2 != 0) {
+                                e.activeEffects["Hundred Points"] = true
+                                affected++
+                            }
+                        }
+                        emoji.activeEffects["Affected: $affected"]
+                    }
+                    "Glowing Star" -> {
+                        // Glowing Star: Give all your Emojis in this location +2 power.
+                        emojiList.forEach { e ->
+                            e.activeEffects["Glowing Star"] = true
+                        }
+                    }
+                    "Rainbow" -> {
+                        // Rainbow: All your other Emojis gain +1 power.
+                        val allOtherEmojis = mutableListOf<Emoji>()
+
+                        // Loop through all locations
+                        locations.forEachIndexed { index, _ ->
+                            val otherEmojis = oppEmojisInLocations[index]
+                            allOtherEmojis.addAll(otherEmojis)
+                        }
+
+                        val allOtherExceptRainbow = allOtherEmojis.filter { it.name == "Rainbow" }
+
+                        // Now, iterate over all the other emojis and apply the Rainbow effect
+                        allOtherExceptRainbow.forEach { e ->
+                            e.activeEffects["Rainbow"] = true
+                        }
+                    }
+                    "Dragon" -> {
+                        // Dragon: Opposing Emojis get -1 power.
+                        val opposingList = playerEmojisInLocations[index]
+                        opposingList.forEach { e ->
+                            e.activeEffects["Dragon"] = true
+                        }
+                    }
+                    "Angel Face" -> {
+                        // Rainbow: All your other Emojis gain +1 power.
+                        val allOtherEmojis = mutableListOf<Emoji>()
+
+                        // Loop through all locations
+                        locations.forEachIndexed { index, _ ->
+                            val otherEmojis = oppEmojisInLocations[index]
+                            allOtherEmojis.addAll(otherEmojis)
+                        }
+
+                        // Now, iterate over all the other emojis and apply the Rainbow effect
+                        allOtherEmojis.forEach { e ->
+                            e.activeEffects["Angel Face"] = true
+                        }
+                    }
+                }
             }
+        }
+    }
+
+    fun checkOnPlayEffects(emoji: Emoji, locationIndex: Int, isPlayer: Boolean) {
+        when (emoji.name) {
+            "Four Leaf Clover" -> {
+                // Shuffle the deck and draw a card (assuming `shuffleDeck` and `drawCard` are functions that do this)
+                if(isPlayer) {
+                    playerDeck.shuffle()
+                    playerDeck.draw()?.let { emojisInHand.add(it) }
+                } else if(againstBot){
+                    botHand.shuffle()
+                    oppDeck.draw()?.let { botHand.add(it) }
+                }
+            }
+
+            "Unicorn" -> {
+                // If played on an empty location, gain +12 power
+                val playerEmojis = playerEmojisInLocations[locationIndex]
+                val oppEmojis = oppEmojisInLocations[locationIndex]
+
+                // Check if the location is empty
+                if (playerEmojis.isEmpty() && oppEmojis.isEmpty()) {
+                    // Apply +12 power to the Unicorn emoji
+                    emoji.addModifier(12)
+                }
+            }
+
+            "Alien" -> {
+                // Apply -1 power to all emojis, including itself
+                // Loop through both player and opponent emojis in all locations
+                val allEmojis = mutableListOf<Emoji>()
+
+                // Add all player and opponent emojis from all locations
+                playerEmojisInLocations.forEach { allEmojis.addAll(it) }
+                oppEmojisInLocations.forEach { allEmojis.addAll(it) }
+
+                var emojisPlayedThisTurn = gameTurn.playerEmojisPlaced.map { it.first }
+
+                allEmojis.filterNot { emojisPlayedThisTurn.contains(it) }
+
+                // Apply -1 power to each emoji
+                allEmojis.forEach { e ->
+                    e.addModifier(-1)
+                }
+
+                Log.d("Game", "Alien effect applied: -1 power to all emojis!")
+            }
+        }
+    }
+
+    fun checkClown(emoji: Emoji, locationIndex: Int, isPlayer: Boolean) {
+        // Determine the opposing side and their emojis at the current location
+        val opposingEmojis = if (isPlayer) oppEmojisInLocations[locationIndex] else playerEmojisInLocations[locationIndex]
+
+        var allMoves = gameTurn.getPlayerThenOpp()
+        if(isPlayer){
+            allMoves = allMoves.filter{ move ->
+                move.second == locationIndex && !move.third
+            }.toMutableList()
+        } else {
+            allMoves = allMoves.filter{ move ->
+                move.second == locationIndex && move.third
+            }.toMutableList()
+        }
+
+        // Count the number of emojis in the target location considering moves not yet played
+        val availableSpace = 4 - opposingEmojis.size - allMoves.size
+
+        if (availableSpace > 0) {
+            if (isPlayer) {
+                playerEmojisInLocations[locationIndex].remove(emoji)
+            } else {
+                oppEmojisInLocations[locationIndex].remove(emoji)
+            }
+
+            // Add the Clown to the opposing side
+            if (isPlayer) {
+                oppEmojisInLocations[locationIndex].add(emoji)
+            } else {
+                playerEmojisInLocations[locationIndex].add(emoji)
+            }
+        } else {
+            Log.d("GameManager", "Clown unable to switch!")
+        }
+    }
+
+    fun checkSparks(emoji: Emoji, locationIndex: Int, isPlayer: Boolean) {
+
+        var allMoves = gameTurn.getPlayerThenOpp()
+        var allMovesAbove = mutableListOf<Triple<Emoji, Int, Boolean>>()
+        var allMovesBelow = mutableListOf<Triple<Emoji, Int, Boolean>>()
+        if (isPlayer) {
+            allMovesAbove = allMoves.filter { move ->
+                move.second == locationIndex - 1 && !move.third
+            }.toMutableList()
+            allMovesBelow = allMoves.filter { move ->
+                move.second == locationIndex + 1 && !move.third
+            }.toMutableList()
+        } else {
+            allMovesAbove = allMoves.filter { move ->
+                move.second == locationIndex - 1 && move.third
+            }.toMutableList()
+            allMovesBelow = allMoves.filter { move ->
+                move.second == locationIndex + 1 && move.third
+            }.toMutableList()
+        }
+
+        // Create two new 2-cost, 1-power emojis for the adjacent locations
+        val newEmoji1 = Emoji("❇️", "Sparkle", "Ooooh. Sparkly.", 2, 1, 0) // Example emoji, adjust with actual Emoji constructor
+        val newEmoji2 = Emoji("❇️", "Sparkle", "Ooooh. Sparkly.", 2, 1, 0)
+
+        if (locationIndex > 0) {
+            if (isPlayer && playerEmojisInLocations[locationIndex - 1].size + allMovesAbove.size < 4) {
+                playerEmojisInLocations[locationIndex - 1].add(newEmoji1)
+            } else if (!isPlayer && oppEmojisInLocations[locationIndex - 1].size + allMovesAbove.size < 4){
+                oppEmojisInLocations[locationIndex - 1].add(newEmoji1)
+            }
+        }
+        if (locationIndex < locations.size - 1) {
+            if (isPlayer && playerEmojisInLocations[locationIndex + 1].size + allMovesAbove.size < 4) {
+                playerEmojisInLocations[locationIndex + 1].add(newEmoji2)
+            } else if (!isPlayer && oppEmojisInLocations[locationIndex + 1].size + allMovesAbove.size < 4) {
+                oppEmojisInLocations[locationIndex + 1].add(newEmoji2)
+            }
+        }
+    }
+
+    fun checkRobot(emoji: Emoji, locationIndex: Int, isPlayer: Boolean) {
+        val currentEmojis = if (isPlayer) playerEmojisInLocations[locationIndex] else oppEmojisInLocations[locationIndex]
+        var allMoves = gameTurn.getPlayerThenOpp()
+        if(isPlayer){
+            allMoves = allMoves.filter{ move ->
+                move.second == locationIndex && !move.third
+            }.toMutableList()
+        } else {
+            allMoves = allMoves.filter{ move ->
+                move.second == locationIndex && move.third
+            }.toMutableList()
+        }
+
+        // Count the number of emojis in the target location considering moves not yet played
+        val availableSpace = 4 - currentEmojis.size - allMoves.size
+        val robotCopy = emoji.copy()
+        if (availableSpace > 0) {
+            // Add a clone to the location
+            if (isPlayer) {
+                playerEmojisInLocations[locationIndex].add(robotCopy)
+            } else {
+                oppEmojisInLocations[locationIndex].add(robotCopy)
+            }
+        } else {
+            Log.d("GameManager", "Robot unable to duplicate.")
+        }
+    }
+
+    fun checkTornado() {
+        // Find all Tornado locations
+        val tornadoLocations = locations.withIndex()
+            .filter { it.value.name == "Tornado" }
+            .map { it.index }
+
+        // Apply a -1 modifier to all emojis in Tornado locations
+        for (locationIndex in tornadoLocations) {
+            val emojisInTornadoLocation = mutableListOf<Emoji>()
+
+            // Collect all player and opponent emojis in the location
+            emojisInTornadoLocation.addAll(playerEmojisInLocations[locationIndex])
+            emojisInTornadoLocation.addAll(oppEmojisInLocations[locationIndex])
+
+            // Apply the Tornado effect
+            emojisInTornadoLocation.forEach { emoji ->
+                emoji.addModifier(-1) // Reduce power
+            }
+        }
+
+    }
+
+    fun checkDestruction(emoji: Emoji, locationIndex: Int, isPlayer: Boolean): List<Triple<Int, Int, Boolean>> {
+        val destroyedEmojis = mutableListOf<Triple<Int, Int, Boolean>>()
+
+        if (emoji.name == "Fire") {
+            // Get the list of emojis for the player or the opponent based on `isPlayer`
+            val emojiList = if (isPlayer) playerEmojisInLocations[locationIndex] else oppEmojisInLocations[locationIndex]
+
+            // Check if the emoji list is not empty
+            if (emojiList.isNotEmpty()) {
+                // Get the first emoji in the list (you can customize this to select the emoji to destroy)
+                val emojiToDestroy = emojiList.first()  // Change logic here if you want a specific emoji
+                val emojiPosition = emojiList.indexOf(emojiToDestroy)
+
+                // Add the destroyed emoji's position and ownership info to the list
+                destroyedEmojis.add(Triple(locationIndex, emojiPosition, isPlayer))
+
+                // Remove the destroyed emoji from the list
+                emojiList.remove(emojiToDestroy)
+
+            }
+        }
+
+        // Return the list of destroyed emoji positions with ownership info
+        return destroyedEmojis
+    }
+
+
+    fun checkVolcanoEffect(): List<Triple<Int, Int, Boolean>> {
+        // Filter the locations that contain "Volcano"
+        val volcanoLocations = locations.filter { it.name.contains("Volcano") }
+
+        // List to hold the positions of the destroyed emojis
+        val destroyedPositions = mutableListOf<Triple<Int, Int, Boolean>>() // Triple of (locationIndex, emojiPosition, isPlayerEmoji)
+
+        // Check if any volcano locations exist
+        if (volcanoLocations.isNotEmpty()) {
+            for (volcanoLocation in volcanoLocations) {
+                // Get the index of the current volcano location
+                val locationIndex = locations.indexOf(volcanoLocation)
+
+                // Combine emojis at the current location (player and opponent)
+                val playerEmojis = playerEmojisInLocations[locationIndex]
+                val oppEmojis = oppEmojisInLocations[locationIndex]
+                val allEmojis = playerEmojis + oppEmojis
+
+                // Sort emojis at this location by power (ascending)
+                val sortedEmojis = allEmojis.sortedBy { it.currentPower }
+
+                // Take up to three of the weakest emojis
+                val weakestEmojis = sortedEmojis.take(3)
+
+                // Iterate over the weakest emojis and trigger their destruction
+                for (emoji in weakestEmojis) {
+                    // Determine where the emoji is (either player or opponent)
+                    val isPlayerEmoji = playerEmojis.contains(emoji)
+                    val targetList = if (isPlayerEmoji) playerEmojis else oppEmojis
+
+                    // Get the emoji position in the respective list
+                    val emojiPosition = targetList.indexOf(emoji)
+
+                    // Add the destroyed emoji's location index, position, and ownership to the list
+                    destroyedPositions.add(Triple(locationIndex, emojiPosition, isPlayerEmoji))
+
+                    // Trigger the destruction (remove the emoji from the respective list)
+                    targetList.remove(emoji)
+                }
+            }
+        }
+
+        // Return the list of destroyed emoji positions with ownership info
+        return destroyedPositions
+    }
+
+    private fun findValidLocationForEmoji(emoji: Emoji): Int {
+        // List to store all valid location indices
+        val validLocations = mutableListOf<Int>()
+
+        // Loop through all locations to find valid ones
+        for (i in oppEmojisInLocations.indices) {
+            // Check if the location is not full (less than 4 emojis already)
+            if (oppEmojisInLocations[i].size < 4) {
+
+                if(!checkIfValidMove(emoji, i, isBot = true)){
+                    continue
+                }
+
+                // If passed all checks, this is a valid location
+                validLocations.add(i)
+            }
+        }
+
+        // If we have valid locations, pick one randomly
+        return if (validLocations.isNotEmpty()) {
+            validLocations.random()  // Randomly selects a valid location index
+        } else {
+            -1  // No valid location found
         }
     }
 
@@ -292,7 +708,7 @@ class GameManager (
         return when {
             playerLocationPower > opponentLocationPower -> "Player"
             opponentLocationPower > playerLocationPower -> "Opponent"
-            else -> if (Random.nextBoolean()) "Player" else "Opponent" // Randomly pick if it's a tie
+            else -> "Neither"
         }
     }
 
@@ -358,13 +774,14 @@ class GameManager (
         var opponentWins = 0
 
         // Iterate through all locations and count wins
-        for (i in playerEmojisInLocations.indices) {
+        for (i in locations.indices) {
             val winner = getLocationWinner(i)
             if (winner == "Player") {
                 playerWins++
             } else if (winner == "Opponent") {
                 opponentWins++
             }
+            Log.d("GameManager", "Location $i winner: $winner")
         }
 
         // Determine overall winner based on number of locations won
@@ -376,7 +793,7 @@ class GameManager (
     }
 
     fun getBotMoves() {
-        var botEnergy = currentTurn
+        botEnergy = currentTurn
 
         // Filter emojis that can be played within the current energy and shuffle them
         Log.d("GameManager", "bot hand: $botHand")
@@ -421,28 +838,61 @@ class GameManager (
         Log.d("GameManager", "gameTurn: $gameTurn")
     }
 
-    fun checkIfValidMove(emoji: Emoji, locationIndex: Int): Boolean {
-        if (emoji.baseCost > currentEnergy){
-            error = "NOT_ENOUGH_ENERGY"
-            return false
+    fun checkIfValidMove(emoji: Emoji, locationIndex: Int, isBot: Boolean): Boolean {
+        // Helper function to set the error only if not a bot
+        fun setError(message: String) {
+            if (!isBot) {
+                error = message
+            }
+        }
+
+        if (isBot) {
+            if (emoji.baseCost > botEnergy) {
+                return false
+            }
+        } else {
+            if (emoji.baseCost > currentEnergy) {
+                setError("NOT_ENOUGH_ENERGY")
+                return false
+            }
         }
 
         if (playerEmojisInLocations[locationIndex].size >= 4) {
-            error = "NO_SPACE_IN_LOCATION"
+            setError("NO_SPACE_IN_LOCATION")
             return false
         }
 
         // Check if the location is a Mountain and baseCost is less than or equal to 4
         if (locations[locationIndex].name == "Mountain" && emoji.baseCost <= 4) {
-            error = "3_COST_BELOW_MOUNTAIN"
+            setError("3_COST_BELOW_MOUNTAIN")
             return false
         }
 
-        // If there's an Angel in either player's or opponent's locations, baseCost should be less than 4
-        if ((playerEmojisInLocations.flatten().any { it.name == "Angel" } ||
-                    oppEmojisInLocations.flatten().any { it.name == "Angel" }) &&
+        // If there's a Peace Dove in either player's or opponent's locations, baseCost should be less than 4
+        if ((playerEmojisInLocations.flatten().any { it.name == "Peace Dove" } ||
+                    oppEmojisInLocations.flatten().any { it.name == "Peace Dove" }) &&
             emoji.baseCost >= 4) {
-            error = "4_COST_ABOVE_ANGEL"
+            setError("4_COST_ABOVE_PEACE")
+            return false
+        }
+
+        // You cannot play Bullseye if you played Emojis last turn.
+        if (emoji.name == "Bullseye" &&
+            playedLastTurn) {
+            setError("BULLSEYE_RESTRICTION")
+            return false
+        }
+
+        if (!isBot &&
+            emoji.name == "Puzzle Piece" &&
+            playerEmojisInLocations[locationIndex].size != 3){
+            setError("PUZZLE_RESTRICTION")
+            return false
+        }
+
+        if (isBot &&
+            emoji.name == "Puzzle Piece" &&
+            oppEmojisInLocations[locationIndex].size != 3){
             return false
         }
 
@@ -455,45 +905,14 @@ class GameManager (
             "NOT_ENOUGH_ENERGY" -> "You don't have enough energy to play this emoji."
             "NO_SPACE_IN_LOCATION" -> "There's no space left in this location."
             "3_COST_BELOW_MOUNTAIN" -> "This emoji's cost is too low to play at the Mountain."
-            "4_COST_ABOVE_ANGEL" -> "This emoji's cost is too high because an Angel is in play."
+            "4_COST_ABOVE_PEACE" -> "This emoji's cost is too high because a Peace Dove is in this location."
+            "BULLSEYE_RESTRICTION" -> "You cannot play Bullseye if you played any last turn."
+            "PUZZLE_RESTRICTION" -> "You must play Puzzle Piece as the last Emoji in a location."
             else -> "An unknown error occurred."
         }
     }
 
-    fun findValidLocationForEmoji(emoji: Emoji): Int {
-        // List to store all valid location indices
-        val validLocations = mutableListOf<Int>()
 
-        // Loop through all locations to find valid ones
-        for (i in oppEmojisInLocations.indices) {
-            // Check if the location is not full (less than 4 emojis already)
-            if (oppEmojisInLocations[i].size < 4) {
-
-                // Check if location is a Mountain, and baseCost should be greater than 4
-                if (locations[i].name == "Mountain" && emoji.baseCost <= 4) {
-                    continue
-                }
-
-                // If there is an Angel present (either in player's or opponent's emojis),
-                // baseCost should be less than 4
-                if ((playerEmojisInLocations.flatten().any { it.name == "Angel" } ||
-                    oppEmojisInLocations.flatten().any { it.name == "Angel" }) &&
-                    emoji.baseCost >= 4) {
-                    continue
-                }
-
-                // If passed all checks, this is a valid location
-                validLocations.add(i)
-            }
-        }
-
-        // If we have valid locations, pick one randomly
-        return if (validLocations.isNotEmpty()) {
-            validLocations.random()  // Randomly selects a valid location index
-        } else {
-            -1  // No valid location found
-        }
-    }
 
     fun moveEmojiToLocation(emoji: Emoji, locationIndex: Int, isPlayer: Boolean) {
         if (emojisInHand.remove(emoji)) {
@@ -521,4 +940,14 @@ class GameManager (
         currentEnergy = currentTurn
         gameTurn.resetPlayerTurn()
     }
+
+    fun removeMove(move : Triple<Emoji, Int, Boolean>){
+        if(move.third){
+            gameTurn.removePlayerMove(move)
+        } else {
+            gameTurn.removeOppMove(move)
+        }
+    }
+
+
 }

@@ -1,5 +1,6 @@
 package com.mobdeve.s12.pinpin.lord.emojisnapp
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.GridLayoutManager
@@ -95,9 +96,16 @@ class LocationAdapter(
     }
 
     fun setLocationsEmojis(newPlayerEmojis: MutableList<MutableList<Emoji>>, newOppEmojis: MutableList<MutableList<Emoji>>) {
-        playerEmojis = newPlayerEmojis
-        oppEmojis = newOppEmojis
-        notifyDataSetChanged()
+        // Validate that the new emoji lists have the same size as the locations
+        if (newPlayerEmojis.size != locations.size || newOppEmojis.size != locations.size) {
+            Log.e("LocationAdapter", "Error: Emoji lists must match the number of locations.")
+            return
+        }
+
+        // Iterate through each location and update its emojis
+        for (i in locations.indices) {
+            updateLocationEmojis(i, newPlayerEmojis[i], newOppEmojis[i])
+        }
     }
 
     fun addToLocation(emoji: Emoji, locationIndex: Int, isPlayerMove: Boolean) {
@@ -131,7 +139,42 @@ class LocationAdapter(
         notifyDataSetChanged()
     }
 
-    fun updateCurrentPower() {
-        notifyDataSetChanged()
+    fun destroyEmojis(allDestroyed: List<Triple<Int, Int, Boolean>>, onComplete: () -> Unit) {
+        val sortedDestroyed = allDestroyed.sortedWith(compareByDescending<Triple<Int, Int, Boolean>> { it.first }
+            .thenByDescending { it.second })
+
+        if(sortedDestroyed.isNotEmpty()) {
+            // Create a handler to schedule the destruction
+            val handler = android.os.Handler(android.os.Looper.getMainLooper())
+
+            // Determine the total time required for all animations
+            val totalDelay =
+                (sortedDestroyed.size - 1) * 500L // Delay for the last emoji destruction
+
+            sortedDestroyed.forEachIndexed { index, emoji ->
+                handler.postDelayed({
+                    Log.d("LocationAdapter", "Emoji destroyed: $emoji")
+
+                    // Check if the emoji belongs to the player or opponent
+                    if (emoji.third) { // Player Emoji
+                        val adapter = playerEmojiAdapters[emoji.first]
+                        adapter.triggerEmojiDestruction(emoji.second)
+                    } else { // Opponent Emoji
+                        val adapter = oppEmojiAdapters[emoji.first]
+                        adapter.triggerEmojiDestruction(emoji.second)
+                    }
+                }, index * 500L) // Delay increases with each index
+            }
+
+            // Schedule onComplete to execute after all animations are finished
+            handler.postDelayed(
+                {
+                    onComplete()
+                },
+                totalDelay + 500L
+            ) // Add an extra delay to ensure all destructions are visibly completed
+        } else {
+            onComplete()
+        }
     }
 }
