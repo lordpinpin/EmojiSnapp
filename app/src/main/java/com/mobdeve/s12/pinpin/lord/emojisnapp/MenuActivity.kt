@@ -30,7 +30,7 @@ class MenuActivity : AppCompatActivity() {
         }
 
         binding.playBtn.setOnClickListener {
-            val intent = Intent(this, GameActivity::class.java)
+            val intent = Intent(this, WaitActivity::class.java)
             startActivity(intent)
         }
 
