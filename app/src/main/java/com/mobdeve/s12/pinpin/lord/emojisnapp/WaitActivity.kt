@@ -3,6 +3,8 @@ package com.mobdeve.s12.pinpin.lord.emojisnapp
 import android.animation.ObjectAnimator
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.util.Log
 import android.view.animation.LinearInterpolator
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -29,7 +31,7 @@ class WaitActivity : AppCompatActivity() {
         rotateAnimation.repeatMode = ObjectAnimator.RESTART // Restart after each cycle
         rotateAnimation.start()
 
-        // TODO: Add matchmaking
+        tryFind()
 
         binding.botBtn.setOnClickListener {
             val intent = Intent(this, GameActivity::class.java)
@@ -41,5 +43,26 @@ class WaitActivity : AppCompatActivity() {
             finish()
         }
 
+    }
+
+    var isActive = true;
+    override fun onStop() {
+        super.onStop()
+        isActive = false
+    }
+
+    fun tryFind() {
+        Matchmaker.getMatch({ uid ->
+            val intent = Intent(this, GameActivity::class.java)
+            startActivity(intent)
+        }, /* error */ {
+            val handler = Handler()
+            Log.e("WaitActivity", "Retrying after 5000ms")
+            handler.postDelayed({
+                if(isActive) {
+                    tryFind()
+                }
+            }, 5000)
+        })
     }
 }
