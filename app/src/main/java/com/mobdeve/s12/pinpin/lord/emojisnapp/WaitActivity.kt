@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import android.view.animation.LinearInterpolator
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import com.mobdeve.s12.pinpin.lord.emojisnapp.databinding.ActivityWaitBinding
@@ -41,8 +42,16 @@ class WaitActivity : AppCompatActivity() {
         }
 
         binding.returnBtn.setOnClickListener {
+            Matchmaker.removeMatchmakingEntry()
             finish()
         }
+
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                Matchmaker.removeMatchmakingEntry()
+                finish()
+            }
+        })
 
     }
 
@@ -50,12 +59,12 @@ class WaitActivity : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
         isActive = false
-        Matchmaker.removeMatchmakingEntry()
+
     }
+
 
     override fun onDestroy() {
         super.onDestroy()
-        Matchmaker.removeMatchmakingEntry()
     }
 
     fun tryFind() {
