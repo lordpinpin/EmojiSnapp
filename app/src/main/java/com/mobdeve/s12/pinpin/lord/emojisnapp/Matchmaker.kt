@@ -20,6 +20,7 @@ class Matchmaker {
         private val currentUser = Firebase.auth.currentUser
         private val instance = FirebaseDatabase.getInstance("https://mco3-7e1e6-default-rtdb.asia-southeast1.firebasedatabase.app/")
         private val database: DatabaseReference = instance.getReference("matchmaking")
+
         fun getMatch(onMatchFound: (String) -> Unit, onError: () -> Unit) {
             if(currentUser?.uid == null) {
                 onError()
@@ -33,7 +34,7 @@ class Matchmaker {
                     val doc = docFromDb ?: MatchmakerDocument()
 
                     val myPlayerEntry = doc.requests.find {
-                        it.user == currentUser.uid
+                        it.user == currentUser.uid && it.isOver == false
                     }
 
                     if(myPlayerEntry == null) {
@@ -63,23 +64,23 @@ class Matchmaker {
                     val myPlayerEntry = doc.requests.find {
                         it.user == currentUser.uid
                     }
-                    if(myPlayerEntry?.found != null) {
+                    if(myPlayerEntry?.opp != null) {
                         // someone already matched with us
                         return Transaction.success(currentData)
                     }
 
                     val matchedPlayerEntry = doc.requests.find {
-                        it.user != currentUser.uid && it.found == null;
+                        it.user != currentUser.uid && it.opp == null;
                     }
 
                     if(myPlayerEntry != null && matchedPlayerEntry != null) {
                         val matchedPlayerUser = matchedPlayerEntry?.user
                         if(matchedPlayerUser != null) {
                             myPlayerEntry.let {
-                                it.found = matchedPlayerUser
+                                it.opp = matchedPlayerUser
                             }
                             matchedPlayerEntry.let {
-                                it.found= currentUser.uid
+                                it.opp= currentUser.uid
                             }
                         }
 
@@ -101,8 +102,8 @@ class Matchmaker {
                             it.user == currentUser.uid
                         }
 
-                        if(myPlayerEntry?.found != null) {
-                            onMatchFound(myPlayerEntry.found!!)
+                        if(myPlayerEntry?.opp != null) {
+                            onMatchFound(myPlayerEntry.opp!!)
                             return
                         }
 
@@ -111,6 +112,42 @@ class Matchmaker {
                     }
 
                     onError()
+                }
+            })
+        }
+
+        fun removeMatchmakingEntry() {
+            if (currentUser?.uid == null) return
+
+            database.runTransaction(object : Transaction.Handler {
+                override fun doTransaction(currentData: MutableData): Transaction.Result {
+                    val docFromDb = currentData.getValue(MatchmakerDocument::class.java)
+                    val doc = docFromDb ?: MatchmakerDocument()
+
+                    // Remove the current user's entry
+                    val iterator = doc.requests.iterator()
+                    while (iterator.hasNext()) {
+                        val entry = iterator.next()
+                        if (entry.user == currentUser.uid) {
+                            iterator.remove()
+                            break
+                        }
+                    }
+
+                    currentData.value = doc
+                    return Transaction.success(currentData)
+                }
+
+                override fun onComplete(
+                    databaseError: DatabaseError?,
+                    committed: Boolean,
+                    currentData: DataSnapshot?
+                ) {
+                    if (committed) {
+                        Log.d("Matchmaker", "Matchmaking entry removed successfully")
+                    } else {
+                        Log.e("Matchmaker", "Failed to remove entry: ${databaseError?.message}")
+                    }
                 }
             })
         }

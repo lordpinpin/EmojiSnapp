@@ -34,6 +34,7 @@ class WaitActivity : AppCompatActivity() {
         tryFind()
 
         binding.botBtn.setOnClickListener {
+            Matchmaker.removeMatchmakingEntry()
             val intent = Intent(this, GameActivity::class.java)
             startActivity(intent)
             finish()
@@ -49,6 +50,12 @@ class WaitActivity : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
         isActive = false
+        Matchmaker.removeMatchmakingEntry()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Matchmaker.removeMatchmakingEntry()
     }
 
     fun tryFind() {
