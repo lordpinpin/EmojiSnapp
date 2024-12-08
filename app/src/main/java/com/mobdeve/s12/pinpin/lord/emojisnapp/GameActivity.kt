@@ -18,6 +18,11 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
+import com.google.firebase.database.FirebaseDatabase
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.mobdeve.s12.pinpin.lord.emojisnapp.databinding.ActivityGameBinding
 import com.mobdeve.s12.pinpin.lord.emojisnapp.databinding.DialogEmojiDetailsBinding
 
@@ -38,15 +43,71 @@ class GameActivity : AppCompatActivity()  {
         binding = ActivityGameBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // TODO: Get saved deck and opp deck
-        var playerDeck = Deck("Basic Deck", DataGenerator.loadActiveBasicData());
-        var oppDeck = Deck("Alternative Deck", DataGenerator.loadActiveAlternativeData());
-        /// TODO: Currently only against bot
-        gameManager = GameManager(playerDeck, oppDeck, true) {
-            // hack to make this render later
-            runOnUiThread({
-                revealMoves()
-            })
+        // Get the user type (bot or not)
+        val isBotGame = intent.getBooleanExtra("IS_BOT_GAME", true)
+
+        // Get Firebase reference to current decks
+        val decksReference = FirebaseDatabase.getInstance().getReference("currentDecksChosen")
+        val currentUserUid = Firebase.auth.currentUser?.uid
+
+        if (currentUserUid != null) {
+            // Fetch user's saved deck
+            decksReference.child(currentUserUid).get().addOnSuccessListener { snapshot ->
+                val savedDeckJson = snapshot.getValue(String::class.java) // Deck stored as JSON
+                val userDeck = if (savedDeckJson != null) {
+                    Gson().fromJson(savedDeckJson, Deck::class.java)
+                } else {
+                    // Use a dummy deck if no saved deck found
+                    Deck("Basic Deck", DataGenerator.loadActiveBasicData())
+                }
+
+                // Determine opponent deck if the game is not against a bot
+                val opponentDeck = if (!isBotGame) {
+                    // Fetch opponent's saved deck (assuming the opponent's UID is passed as an extra)
+                    val opponentUid = intent.getStringExtra("OPPONENT_UID")
+
+                    if (opponentUid != null) {
+                        decksReference.child(opponentUid).get().addOnSuccessListener { opponentSnapshot ->
+                            val opponentDeckJson = opponentSnapshot.getValue(String::class.java)
+                            val opponentDeck = if (opponentDeckJson != null) {
+                                // Deserialize the opponent's saved deck JSON to a Deck object
+                                Gson().fromJson(opponentDeckJson, Deck::class.java)
+                            } else {
+                                // Use a dummy deck for the opponent if no saved deck found
+                                Deck("Alternative Deck", DataGenerator.loadActiveAlternativeData())
+                            }
+
+                            // Initialize the game manager with the fetched decks
+                            gameManager = GameManager(userDeck, opponentDeck, isBotGame) {
+                                // hack to make this render later
+                                runOnUiThread {
+                                    revealMoves()
+                                }
+                            }
+
+                        }.addOnFailureListener {
+                            // Handle any failure in fetching opponent's deck
+                            Log.e("GameActivity", "Error fetching opponent's deck: ${it.message}")
+                        }
+                    }
+                    // Return an empty deck for now if no opponent UID is provided
+                    Deck("Alternative Deck", DataGenerator.loadActiveAlternativeData())
+                } else {
+                    // Use a dummy deck for bot game
+                    Deck("Alternative Deck", DataGenerator.loadActiveAlternativeData())
+                }
+
+                // Initialize the game manager after the decks are determined
+                gameManager = GameManager(userDeck, opponentDeck, isBotGame) {
+                    // hack to make this render later
+                    runOnUiThread {
+                        revealMoves()
+                    }
+                }
+            }.addOnFailureListener {
+                // Handle any failure in fetching user's deck
+                Log.e("GameActivity", "Error fetching user's deck: ${it.message}")
+            }
         }
 
         binding.snapTx.setOnClickListener {
@@ -182,14 +243,17 @@ class GameActivity : AppCompatActivity()  {
                 when (result) {
                     "Win" -> {
                         showWinResultDialog(gameManager.ante * 2) // Show win dialog
+                        gameManager.saveMatch(gameManager.ante * 2, MatchResult.WON, MatchResult.LOST)
                     }
 
                     "Loss" -> {
                         showLoseResultDialog(gameManager.ante * 2) // Show lose dialog
+                        gameManager.saveMatch(-gameManager.ante * 2, MatchResult.WON, MatchResult.LOST)
                     }
 
                     "Draw" -> {
                         showDrawResultDialog() // Show draw dialog
+                        gameManager.saveMatch(0, MatchResult.DRAW, MatchResult.DRAW)
                     }
                 }
 
@@ -207,6 +271,7 @@ class GameActivity : AppCompatActivity()  {
     private fun retreatGame() {
 
         gameManager.forfeitGame()
+        gameManager.saveMatch(-gameManager.ante, MatchResult.FORFEIT, MatchResult.FLEE)
 
         val dialogDelayMillis = 2000L
         Handler(Looper.getMainLooper()).postDelayed({
@@ -225,7 +290,7 @@ class GameActivity : AppCompatActivity()  {
     // When opponent chooses to flee.
     private fun fleedGame() {
 
-        gameManager.forfeitGame()
+        gameManager.saveMatch(gameManager.ante, MatchResult.FLEE, MatchResult.FORFEIT)
 
         val dialogDelayMillis = 2000L
         Handler(Looper.getMainLooper()).postDelayed({

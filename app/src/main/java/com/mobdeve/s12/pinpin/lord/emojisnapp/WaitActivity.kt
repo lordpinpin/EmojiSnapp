@@ -37,6 +37,7 @@ class WaitActivity : AppCompatActivity() {
         binding.botBtn.setOnClickListener {
             Matchmaker.removeMatchmakingEntry()
             val intent = Intent(this, GameActivity::class.java)
+            intent.putExtra("isBotGame", true)
             startActivity(intent)
             finish()
         }
@@ -70,6 +71,7 @@ class WaitActivity : AppCompatActivity() {
     fun tryFind() {
         Matchmaker.getMatch({ uid ->
             val intent = Intent(this, GameActivity::class.java)
+            intent.putExtra("isBotGame", false)
             startActivity(intent)
         }, /* error */ {
             val handler = Handler()

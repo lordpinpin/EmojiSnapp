@@ -2,6 +2,7 @@ package com.mobdeve.s12.pinpin.lord.emojisnapp
 
 import android.util.Log
 import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -10,6 +11,13 @@ import com.google.firebase.database.MutableData
 import com.google.firebase.database.Transaction
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.database
+import com.google.gson.Gson
+import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Date
+import java.util.Locale
 import java.util.UUID
 import kotlin.random.Random
 
@@ -17,7 +25,7 @@ import kotlin.random.Random
 class GameManager (
     private val playerDeck: Deck,
     private val oppDeck: Deck,
-    private val againstBot: Boolean,
+    private var againstBot: Boolean,
     private val onOpponentTurnComplete : () -> Unit
 )
 {
@@ -25,40 +33,44 @@ class GameManager (
     private val database: DatabaseReference = instance.getReference("TODO_CHANGE_THIS")
     private val tieBreakerRef = database.child("tieBreakerResult")
 
+    // Player-related variables
     private val emojisInHand = mutableListOf<Emoji>()
-    private val locations : List<Location> = DataGenerator.loadLocations(true)
     private val playerEmojisInLocations = mutableListOf<MutableList<Emoji>>()
+    private var playerName = ""
+
+    // Opponent-related variables
     private val oppEmojisInLocations = mutableListOf<MutableList<Emoji>>()
-    private val botHand = mutableListOf<Emoji>()
-    private var alreadyAnte = false;
-    private var botAnte = false;
-    var ante = 1
-    var currentTurn = 0
-    private var myGameTurnUuid = UUID.randomUUID().toString();
+    private var oppName = ""
+
+    // Game state variables
+    private val locations: List<Location> = DataGenerator.loadLocations(true)
     private var gameTurn = GameTurn()
+    private var myGameTurnUuid = UUID.randomUUID().toString()
+    var currentTurn = 0
+    var ante = 1
+    private var alreadyAnte = false
+    private var botAnte = false
+
+    // Energy-related variables
     var currentEnergy = 0
     var botEnergy = 0
+
+    // Bot-related variables
+    private val botHand = mutableListOf<Emoji>()
+    private var playedLastTurn = false
+
+    // Error handling
     private var error = ""
-    private var playedLastTurn = false;
 
     init {
-        //TODO: Change this to function that determines if playing against human or not.
-        if(!againstBot) {
-            myGameTurnUuid = UUID.randomUUID().toString();
-            gameTurn = GameTurn(myGameTurnUuid)
-            database.addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val recvGameTurn = snapshot.getValue(GameTurn::class.java) ?: return
-                    if (recvGameTurn.uuid != myGameTurnUuid) { // change was from other client (not us)
-                        gameTurn.opponentEmojisPlaced.clear()
-                        gameTurn.opponentEmojisPlaced.addAll(recvGameTurn.opponentEmojisPlaced) // other client already puts it on opponentEmojisPlaced
-                        onOpponentTurnComplete()
-                    }
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    Log.e("Firebase", "Error reading currentTurn: ${error.message}")
-                }
+        if(!againstBot) run {
+            Matchmaker.getMatch({ opponentUid ->
+                playerName = Firebase.auth.currentUser?.uid ?: "Unknown UID"
+                oppName = opponentUid
+                Log.d("Match", "Opponent found: $oppName")
+            }, {
+                Log.e("Match", "Failed to find opponent. Defaulting to bot match.")
+                againstBot = true
             })
         }
 
@@ -74,6 +86,8 @@ class GameManager (
             repeat(5) {
                 oppDeck.draw()?.let { botHand.add(it) }
             }
+
+            oppName = "Bot"
         }
 
         getOverallWinner()
@@ -158,15 +172,6 @@ class GameManager (
             // available immediately
 
         } else {
-            val test = database.setValue(gameTurn.toOtherPlayersPOV())
-            test.addOnCompleteListener { task ->
-                if(task.isSuccessful) {
-                    Log.d("GameManager", "Successful")
-                } else {
-                    Log.d("GameManager", task.exception.toString())
-                }
-            }
-            Log.d("GameManager", "Writing")
             //TODO: Wait for opponent endTurn
             //TODO: Send Player moves to opponent
             //TODO: Recieve opp moves
@@ -179,7 +184,6 @@ class GameManager (
             //TODO: Send to opponent if you ante'd
             //TODO: Check if opponent ante'd
             //TODo: Add opp moves to GameTurn.
-            onOpponentTurnComplete()
         }
 
         return false
@@ -189,6 +193,40 @@ class GameManager (
         if (!againstBot) {
             gameTurn.flee()
             //TODO: Send to other player that I retreated.
+        }
+    }
+
+    fun saveMatch(points: Int, player1: MatchResult, player2: MatchResult) {
+        val database = FirebaseDatabase.getInstance().getReference("matches")
+        val gson = Gson()
+
+        // Convert Deck objects to JSON strings
+        val playerDeckJson = gson.toJson(playerDeck)
+        val oppDeckJson = gson.toJson(oppDeck)
+
+        // Prepare the match data
+        val matchResult = mapOf(
+            "player1" to playerName,
+            "player2" to oppName,
+            "player1Deck" to playerDeckJson, // JSON string
+            "player2Deck" to oppDeckJson,       // JSON string
+            "player1Points" to points,
+            "player2Points" to -points,
+            "player1Result" to player1,
+            "player2Result" to player2,
+            "date" to SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
+        )
+
+        // Save to Firebase
+        val matchKey = database.push().key
+        if (matchKey != null) {
+            database.child(matchKey).setValue(matchResult)
+                .addOnSuccessListener {
+                    Log.d("Firebase", "Match saved successfully!")
+                }
+                .addOnFailureListener { e ->
+                    Log.e("Firebase", "Failed to save match: ${e.message}")
+                }
         }
     }
 

@@ -86,4 +86,5 @@ dependencies {
     implementation(libs.androidx.startup.runtime)
     implementation(platform("com.google.firebase:firebase-bom:33.6.0"))
     implementation(libs.firebase.analytics)
+    implementation(libs.gson)
 }
