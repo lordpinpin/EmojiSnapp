@@ -1,7 +1,12 @@
 package com.mobdeve.s12.pinpin.lord.emojisnapp
 
+import android.content.Context
 import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -24,17 +29,22 @@ import com.mobdeve.s12.pinpin.lord.emojisnapp.databinding.ActivityMenuBinding
 import com.mobdeve.s12.pinpin.lord.emojisnapp.databinding.ActivityTrackBinding
 import com.mobdeve.s12.pinpin.lord.emojisnapp.databinding.DialogEmojiDetailsBinding
 
-class DeckActivity : AppCompatActivity() {
+class DeckActivity : AppCompatActivity(), SensorEventListener {
 
     private lateinit var binding: ActivityDeckBinding
     // TODO: Load currently chosen deck in currentDecksChosen in Firebase
     private lateinit var currentDeckChosen: Deck
+    private lateinit var sensorManager: SensorManager
+    private lateinit var rotationVectorSensor: Sensor
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         binding = ActivityDeckBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        rotationVectorSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)!!
 
         // Deck Title
         binding.deckTitleTx.visibility = View.VISIBLE
@@ -111,6 +121,46 @@ class DeckActivity : AppCompatActivity() {
 
             finish()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Register the rotation vector sensor listener
+        rotationVectorSensor?.also { sensor ->
+            sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_UI)
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        // Unregister the sensor listener to save resources
+        sensorManager.unregisterListener(this)
+    }
+
+    override fun onSensorChanged(event: SensorEvent?) {
+        if (event?.sensor?.type == Sensor.TYPE_ROTATION_VECTOR) {
+            // Convert the rotation vector data to a rotation matrix
+            val rotationMatrix = FloatArray(9)
+            SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values)
+
+            // Extract orientation angles (azimuth, pitch, roll) from the rotation matrix
+            val orientationAngles = FloatArray(3)
+            SensorManager.getOrientation(rotationMatrix, orientationAngles)
+
+            val pitch = Math.toDegrees(orientationAngles[1].toDouble()).toFloat() // Front-back tilt
+            val roll = Math.toDegrees(orientationAngles[2].toDouble()).toFloat()  // Side-to-side tilt
+
+            // Pass the tilt angles to your RecyclerView adapter
+            binding.deckEmojiRv.adapter?.let { adapter ->
+                if (adapter is DeckEmojiAdapter) {
+                    adapter.updateTiltAngles(pitch, roll)
+                }
+            }
+        }
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+        // No implementation needed for this case
     }
 
     private fun updateEmojiRecycler(deck: Deck) {
