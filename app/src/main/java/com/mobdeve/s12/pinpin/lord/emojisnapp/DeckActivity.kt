@@ -3,6 +3,7 @@ package com.mobdeve.s12.pinpin.lord.emojisnapp
 import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
@@ -13,6 +14,10 @@ import androidx.emoji2.bundled.BundledEmojiCompatConfig
 import androidx.emoji2.text.EmojiCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
+import com.google.firebase.database.FirebaseDatabase
+import com.google.gson.Gson
 import com.mobdeve.s12.pinpin.lord.emojisnapp.EmojiType
 import com.mobdeve.s12.pinpin.lord.emojisnapp.databinding.ActivityDeckBinding
 import com.mobdeve.s12.pinpin.lord.emojisnapp.databinding.ActivityMenuBinding
@@ -22,6 +27,8 @@ import com.mobdeve.s12.pinpin.lord.emojisnapp.databinding.DialogEmojiDetailsBind
 class DeckActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityDeckBinding
+    // TODO: Load currently chosen deck in currentDecksChosen in Firebase
+    private lateinit var currentDeckChosen: Deck
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,8 +62,10 @@ class DeckActivity : AppCompatActivity() {
             }
         }
 
+        // TODO: Fetch decks that player owns
         var deckData = DeckGenerator.loadDecks()
         deckData.forEach { it.sort() }
+        currentDeckChosen = deckData[0]
 
         var deckEmojiAdapter = DeckEmojiAdapter(deckData[0].getEmojis()) { emoji ->
             showEmojiDetailsPopup(emoji, EmojiType.DECK_EMOJI)
@@ -90,6 +99,16 @@ class DeckActivity : AppCompatActivity() {
         val progress = intent.getIntExtra("CUR_LEVEL", 28);
 
         binding.deckBackBtn.setOnClickListener {
+            val decksReference = FirebaseDatabase.getInstance().getReference("currentDecksChosen")
+            val deckJson = Gson().toJson(currentDeckChosen)
+            val currentUserUid = Firebase.auth.currentUser?.uid
+
+            if (currentUserUid != null) {
+                decksReference.child(currentUserUid).setValue(deckJson)
+                    .addOnSuccessListener { Log.d("DeckSave", "Deck saved successfully!") }
+                    .addOnFailureListener { Log.e("DeckSave", "Failed to save deck", it) }
+            }
+
             finish()
         }
     }
