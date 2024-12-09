@@ -185,12 +185,12 @@ class GameActivity : AppCompatActivity()  {
                 when (result) {
                     "Win" -> {
                         showWinResultDialog(gameManager.ante * 2) // Show win dialog
-                        gameManager.saveMatch(gameManager.ante * 2, MatchResult.WON, MatchResult.LOST)
+                        gameManager.saveMatch(-gameManager.ante * 2, MatchResult.WON, MatchResult.LOST)
                     }
 
                     "Loss" -> {
                         showLoseResultDialog(gameManager.ante * 2) // Show lose dialog
-                        gameManager.saveMatch(-gameManager.ante * 2, MatchResult.WON, MatchResult.LOST)
+                        gameManager.saveMatch(gameManager.ante * 2, MatchResult.WON, MatchResult.LOST)
                     }
 
                     "Draw" -> {
