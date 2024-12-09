@@ -182,10 +182,11 @@ object EmojiFactory {
     fun getEmojisWithPositiveUnlockThreshold(): List<Emoji> {
         return emojiCache.values.filter { it.unlockThreshold > 0 }
             .sortedBy { it.unlockThreshold }
+            .distinct()
     }
 
     // Function to get all emojis, sorted by name (alphabetical order)
     fun getEmojisSortedByName(): List<Emoji> {
-        return emojiCache.values.sortedBy { it.name }
+        return emojiCache.values.sortedBy { it.name }.distinct()
     }
 }
