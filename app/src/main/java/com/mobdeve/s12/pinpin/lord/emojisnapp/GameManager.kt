@@ -38,7 +38,7 @@ class GameManager (
     // Player-related variables
     private val emojisInHand = mutableListOf<Emoji>()
     private val playerEmojisInLocations = mutableListOf<MutableList<Emoji>>()
-    private var playerName = ""
+    private var playerName = Firebase.auth.currentUser?.uid ?: "Unknown UID"
 
     // Opponent-related variables
     private val oppEmojisInLocations = mutableListOf<MutableList<Emoji>>()
@@ -67,7 +67,6 @@ class GameManager (
     init {
         if(!againstBot) run {
             Matchmaker.getMatch({ opponentUid, prevState ->
-                playerName = Firebase.auth.currentUser?.uid ?: "Unknown UID"
                 oppName = opponentUid
                 fromUs = prevState
                 Log.d("Match", "Opponent found: $oppName")
