@@ -26,7 +26,7 @@ class MatchAdapter(
         fun bind(match: Match) {
             // Set the match details to the TextViews using View Binding
             binding.matchOppTx.text = "vs. " + match.opponent
-            binding.matchResultTx.text = match.result.resultString
+            binding.matchResultTx.text = match.result
             binding.matchValueTx.text = "${match.value}"
 
             // Format the date to a readable string
