@@ -72,16 +72,26 @@ class GameManager (
                 fromUs = prevState
                 Log.d("Match", "Opponent found: $oppName")
                 MessageListener.onMessage(oppName, { messageParsed, isFlee ->
+                    if(isFlee) {
+                        // opponent fleed
+                        MessageListener.endGameOfOpp(oppName)
+                        fleedGame()
+                        return@onMessage;
+                    }
+
+                    if(messageParsed == null) {
+                        return@onMessage;
+                    }
+
                     if(fromOpp == null || fromOpp!!.version != messageParsed.version) {
                         fromOpp = messageParsed
                         gameTurn.opponentEmojisPlaced = messageParsed.emojisPlaced
                     }
 
-                    Log.e("DBG", (fromOpp?.version.toString()) + fromUs?.version)
-                    if(isFlee) {
-                        // opponent fleed
-                        fleedGame()
-                    } else if(fromOpp?.version == fromUs?.version) {
+                    Log.e("DBG", (fromOpp?.version.toString()))
+                    Log.e("DBG2", isFlee.toString())
+
+                    if(fromOpp?.version == fromUs?.version) {
                         revealMoves()
                     }
                 })
@@ -206,7 +216,8 @@ class GameManager (
     fun forfeitGame(){
         if (!againstBot) {
             gameTurn.flee()
-            //TODO: Send to other player that I retreated.
+            //Send to other player that I retreated.
+            MessageListener.forfeitGame(oppName)
         }
     }
 

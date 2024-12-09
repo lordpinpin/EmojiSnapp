@@ -18,7 +18,7 @@ class MessageListener {
         private val currentUser = Firebase.auth.currentUser
         private val instance = FirebaseDatabase.getInstance("https://mco3-7e1e6-default-rtdb.asia-southeast1.firebasedatabase.app/")
         private val database: DatabaseReference = instance.getReference("matchmaking")
-        fun onMessage(opp: String, callback: (message: MessageParsed, flee: Boolean) -> Unit) {
+        fun onMessage(opp: String, callback: (message: MessageParsed?, flee: Boolean) -> Unit) {
             val listener = object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     // Get Post object and use the values to update the UI
@@ -28,19 +28,15 @@ class MessageListener {
                         val entry = doc.requests.find {
                             it.user == opp && it.opp == currentUser?.uid && it.isOver != true
                         }
+
+                        Log.e("SYNC", "recv data " + entry?.toString())
+                        var messageParsed : MessageParsed? = null
                         try {
-                            val messageParsed = Gson().fromJson(entry?.emojiMessage, MessageParsed::class.java)
-                            Log.e("TEST", (messageParsed == null).toString());
-                            if(messageParsed != null) {
-                                var retreat = false
-                                if(entry?.retreat != null) {
-                                    retreat = entry.retreat
-                                }
-                                callback(messageParsed, retreat)
-                            }
+                            messageParsed = Gson().fromJson(entry?.emojiMessage, MessageParsed::class.java)
                         } catch (e: Exception) {
                             e.printStackTrace()
                         }
+                        callback(messageParsed, entry?.retreat ?: false)
                     }
                 }
 
@@ -60,11 +56,88 @@ class MessageListener {
                     val doc = docFromDb ?: return Transaction.success(currentData);
 
                     val myPlayerEntry = doc.requests.find {
-                        it.user == currentUser.uid && it.isOver == false
+                        it.user == currentUser.uid && it.opp == opp && it.isOver == false
                     }
 
                     if(myPlayerEntry != null) {
                         myPlayerEntry.emojiMessage = Gson().toJson(message)
+                    }
+
+                    currentData.value = doc
+                    return Transaction.success(currentData)
+                }
+
+                override fun onComplete(
+                    error: DatabaseError?,
+                    committed: Boolean,
+                    currentData: DataSnapshot?
+                ) {
+                    Log.d("send", error.toString())
+                    Log.d("send", committed.toString())
+                }
+            })
+        }
+        fun forfeitGame(opp: String) {
+            if(currentUser?.uid == null) {
+                return
+            }
+
+            database.runTransaction(object : Transaction.Handler {
+                override fun doTransaction(currentData: MutableData): Transaction.Result {
+                    val docFromDb = currentData.getValue(MatchmakerDocument::class.java)
+                    val doc = docFromDb ?: return Transaction.success(currentData);
+
+                    val myPlayerEntry = doc.requests.find {
+                        it.user == currentUser.uid && it.opp == opp && it.isOver == false
+                    }
+
+                    if(myPlayerEntry != null) {
+                        myPlayerEntry.retreat = true
+                    } else {
+                        Log.e("ERR", "cannot end game because not found??")
+                    }
+
+                    currentData.value = doc
+                    return Transaction.success(currentData)
+                }
+
+                override fun onComplete(
+                    error: DatabaseError?,
+                    committed: Boolean,
+                    currentData: DataSnapshot?
+                ) {
+                    Log.d("send", error.toString())
+                    Log.d("send", committed.toString())
+                }
+            })
+        }
+        fun endGameOfOpp(opp: String) {
+            if(currentUser?.uid == null) {
+                return
+            }
+
+            database.runTransaction(object : Transaction.Handler {
+                override fun doTransaction(currentData: MutableData): Transaction.Result {
+                    val docFromDb = currentData.getValue(MatchmakerDocument::class.java)
+                    val doc = docFromDb ?: return Transaction.success(currentData);
+
+                    val myPlayerEntry = doc.requests.find {
+                        it.user == currentUser.uid && it.opp == opp && it.isOver == false
+                    }
+
+                    if(myPlayerEntry != null) {
+                        myPlayerEntry.isOver = true
+                    } else {
+                        Log.e("ERR", "cannot end game because not found??")
+                    }
+
+                    val otherPlayerEntry = doc.requests.find {
+                        it.user == opp && it.opp == currentUser.uid && it.isOver == false
+                    }
+                    if(otherPlayerEntry != null) {
+                        otherPlayerEntry.isOver = true
+                    } else {
+                        Log.e("ERR", "cannot end game because not found??")
                     }
 
                     currentData.value = doc
