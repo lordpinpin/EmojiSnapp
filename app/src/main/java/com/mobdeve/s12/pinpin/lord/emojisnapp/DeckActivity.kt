@@ -147,12 +147,23 @@ class DeckActivity : AppCompatActivity(), SensorEventListener {
             val orientationAngles = FloatArray(3)
             SensorManager.getOrientation(rotationMatrix, orientationAngles)
 
-            val pitch = Math.toDegrees(orientationAngles[1].toDouble()).toFloat() // Front-back tilt
-            val roll = Math.toDegrees(orientationAngles[2].toDouble()).toFloat()  // Side-to-side tilt
+            // Get pitch and roll angles (in degrees)
+            var pitch = Math.toDegrees(orientationAngles[1].toDouble()).toFloat() // Front-back tilt
+            var roll = Math.toDegrees(orientationAngles[2].toDouble()).toFloat()  // Side-to-side tilt
 
-            // Pass the tilt angles to your RecyclerView adapter
+            // Clamp the values to a specific range to prevent excessive tilting
+            pitch = clampTilt(pitch, -30f, 30f)  // Example limits for pitch
+            roll = clampTilt(roll, -30f, 30f)    // Example limits for roll
+
+            // Update both RecyclerViews with the clamped tilt values
             binding.deckEmojiRv.adapter?.let { adapter ->
                 if (adapter is DeckEmojiAdapter) {
+                    adapter.updateTiltAngles(pitch, roll)
+                }
+            }
+
+            binding.emojiListRv.adapter?.let { adapter ->
+                if (adapter is EmojiListAdapter) {
                     adapter.updateTiltAngles(pitch, roll)
                 }
             }
@@ -170,6 +181,10 @@ class DeckActivity : AppCompatActivity(), SensorEventListener {
         binding.deckEmojiRv.adapter = deckEmojiAdapter
         binding.deckTitleTx.text = deck.getTitle()
         deckEmojiAdapter.notifyItemRangeChanged(0, deck.getEmojis().size)
+    }
+
+    private fun clampTilt(value: Float, min: Float, max: Float): Float {
+        return Math.max(min, Math.min(max, value))
     }
 
     private fun showEmojiDetailsPopup(emoji: Emoji, type: EmojiType) {
