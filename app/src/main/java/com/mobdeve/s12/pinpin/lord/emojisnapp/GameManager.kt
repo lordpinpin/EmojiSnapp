@@ -222,7 +222,7 @@ class GameManager (
     }
 
     fun saveMatch(points: Int, player1: MatchResult, player2: MatchResult) {
-        val database = FirebaseDatabase.getInstance().getReference("matches")
+        val database = instance.getReference("matches")
         val gson = Gson()
 
         // Convert Deck objects to JSON strings
