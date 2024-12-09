@@ -11,6 +11,11 @@ class Deck(private val title: String, private val emojis: ArrayList<Emoji>) {
         return this.title;
     }
 
+    fun copy(): Deck {
+        val copiedEmojis = ArrayList(emojis.map { it.copy() }) // Deep copy of emojis
+        return Deck(title, copiedEmojis)
+    }
+
     // Shuffle the deck
     fun shuffle() {
         emojis.shuffle()

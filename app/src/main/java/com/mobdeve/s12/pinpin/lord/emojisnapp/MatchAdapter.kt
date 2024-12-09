@@ -25,7 +25,7 @@ class MatchAdapter(
     inner class MatchViewHolder(private val binding: MatchDetailsBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(match: Match) {
             // Set the match details to the TextViews using View Binding
-            binding.matchOppTx.text = "vs. " + match.opponent.substring(0, 8)
+            binding.matchOppTx.text = "vs. " + match.opponent.substring(0, Math.min(match.opponent.length, 8))
             binding.matchResultTx.text = match.result
             binding.matchValueTx.text = "${match.value}"
 
