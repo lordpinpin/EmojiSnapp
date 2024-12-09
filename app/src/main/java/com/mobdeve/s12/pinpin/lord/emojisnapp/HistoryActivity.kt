@@ -10,6 +10,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 import com.google.gson.Gson
 import com.mobdeve.s12.pinpin.lord.emojisnapp.databinding.ActivityHistoryBinding
 import com.mobdeve.s12.pinpin.lord.emojisnapp.databinding.DialogEmojiDetailsBinding
@@ -19,7 +21,9 @@ import java.util.Locale
 
 class HistoryActivity : AppCompatActivity() {
     private lateinit var binding: ActivityHistoryBinding
-
+    private val instance = FirebaseDatabase.getInstance("https://mco3-7e1e6-default-rtdb.asia-southeast1.firebasedatabase.app/")
+    private val database = instance.getReference("matches")
+    private val user = FirebaseAuth.getInstance().currentUser;
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -36,13 +40,20 @@ class HistoryActivity : AppCompatActivity() {
             finish()
         }
 
-        var matches = emptyList<Match>()
-
 
 
         binding.matchRv.layoutManager = LinearLayoutManager(this)
-        binding.matchRv.adapter = MatchAdapter(matches) { emoji ->
-            showEmojiDetailsPopup(emoji)
+        database.get().addOnSuccessListener {
+            val idk = it.value as Map<String, Map<String, Any>>
+            val matches = ArrayList<Match>()
+            val idk2 = ArrayList<Map<String, Any>>()
+            idk.forEach {
+                val x = it.value
+                idk2.add(x)
+            }
+            binding.matchRv.adapter = MatchAdapter(convertMatchResultToMatches(idk2, user?.uid ?: "not working")) { emoji ->
+                showEmojiDetailsPopup(emoji)
+            }
         }
 
 
@@ -81,7 +92,7 @@ class HistoryActivity : AppCompatActivity() {
             val oppName = matchResult["player2"] as String
             val playerDeckJson = matchResult["player1Deck"] as String
             val oppDeckJson = matchResult["player2Deck"] as String
-            val points = matchResult["player1Points"] as Int
+            val points = matchResult["player1Points"] as Long
             val player1Result = matchResult["player1Result"] as String
             val player2Result = matchResult["player2Result"] as String
             val dateStr = matchResult["date"] as String
