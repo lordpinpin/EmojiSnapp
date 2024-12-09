@@ -6,4 +6,4 @@ import com.google.firebase.database.IgnoreExtraProperties
 
 data class MessageParsed(var emojisPlaced: MutableList<Pair<Emoji, Int>> = mutableListOf(), var version: Int = 0)
 @IgnoreExtraProperties
-data class MatchmakerEntry(val user: String? = null, var opp: String? = null, var emojiMessage: String = "", val retreat: Boolean? = null, var isOver: Boolean? = false)
+data class MatchmakerEntry(val user: String? = null, var opp: String? = null, var emojiMessage: String = "", var retreat: Boolean? = null, var isOver: Boolean? = false)

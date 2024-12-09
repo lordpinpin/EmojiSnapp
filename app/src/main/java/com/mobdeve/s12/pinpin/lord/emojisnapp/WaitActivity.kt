@@ -73,6 +73,7 @@ class WaitActivity : AppCompatActivity() {
             val intent = Intent(this, GameActivity::class.java)
             intent.putExtra("IS_BOT_GAME", false)
             startActivity(intent)
+            finish()
         }, /* error */ {
             val handler = Handler()
             Log.e("WaitActivity", "Retrying after 5000ms")
