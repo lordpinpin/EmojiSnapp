@@ -19,7 +19,7 @@ class MatchGenerator {
                 opponent = "PlayerA",
                 date = Date(),
                 value = "+8",
-                result = MatchResult.WON,
+                result = MatchResult.WON.toString(),
                 deck = playerDeck1, // Player's Deck
                 oppDeck = playerDeck2 // Opponent's Deck
             )
@@ -30,7 +30,7 @@ class MatchGenerator {
                 opponent = "PlayerB",
                 date = Date(),
                 value = "-4",
-                result = MatchResult.FORFEIT,
+                result = MatchResult.FORFEIT.toString(),
                 deck = playerDeck2, // Player's Deck
                 oppDeck = playerDeck1 // Opponent's Deck
             )
@@ -41,7 +41,7 @@ class MatchGenerator {
                 opponent = "PlayerC",
                 date = Date(),
                 value = "-1",
-                result = MatchResult.FLEE,
+                result = MatchResult.FLEE.toString(),
                 deck = playerDeck1, // Player's Deck
                 oppDeck = playerDeck2 // Opponent's Deck
             )
