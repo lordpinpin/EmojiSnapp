@@ -35,6 +35,9 @@ class GameManager (
     private val database: DatabaseReference = instance.getReference("TODO_CHANGE_THIS")
     private val tieBreakerRef = database.child("tieBreakerResult")
 
+    private val playerDeckCopy: Deck = playerDeck.copy()
+    private val oppDeckCopy: Deck = oppDeck.copy()
+
     // Player-related variables
     private val emojisInHand = mutableListOf<Emoji>()
     private val playerEmojisInLocations = mutableListOf<MutableList<Emoji>>()
@@ -115,6 +118,8 @@ class GameManager (
 
             oppName = "Bot"
         }
+
+
 
         getOverallWinner()
 
@@ -225,8 +230,8 @@ class GameManager (
         val gson = Gson()
 
         // Convert Deck objects to JSON strings
-        val playerDeckJson = gson.toJson(playerDeck)
-        val oppDeckJson = gson.toJson(oppDeck)
+        val playerDeckJson = gson.toJson(playerDeckCopy)
+        val oppDeckJson = gson.toJson(oppDeckCopy)
 
         // Prepare the match data
         val matchResult = mapOf(
@@ -375,21 +380,6 @@ class GameManager (
                             e.activeEffects["Dragon"] = true
                         }
                     }
-                    "Angel Face" -> {
-                        // Rainbow: All your other Emojis gain +1 power.
-                        val allOtherEmojis = mutableListOf<Emoji>()
-
-                        // Loop through all locations
-                        locations.forEachIndexed { index, _ ->
-                            val otherEmojis = playerEmojisInLocations[index]
-                            allOtherEmojis.addAll(otherEmojis)
-                        }
-
-                        // Now, iterate over all the other emojis and apply the Rainbow effect
-                        allOtherEmojis.forEach { e ->
-                            e.activeEffects["Angel Face"] = true
-                        }
-                    }
                 }
             }
         }
@@ -456,21 +446,6 @@ class GameManager (
                         val opposingList = playerEmojisInLocations[index]
                         opposingList.forEach { e ->
                             e.activeEffects["Dragon"] = true
-                        }
-                    }
-                    "Angel Face" -> {
-                        // Rainbow: All your other Emojis gain +1 power.
-                        val allOtherEmojis = mutableListOf<Emoji>()
-
-                        // Loop through all locations
-                        locations.forEachIndexed { index, _ ->
-                            val otherEmojis = oppEmojisInLocations[index]
-                            allOtherEmojis.addAll(otherEmojis)
-                        }
-
-                        // Now, iterate over all the other emojis and apply the Rainbow effect
-                        allOtherEmojis.forEach { e ->
-                            e.activeEffects["Angel Face"] = true
                         }
                     }
                 }

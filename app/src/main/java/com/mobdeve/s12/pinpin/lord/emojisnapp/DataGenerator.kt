@@ -132,12 +132,12 @@ class DataGenerator {
                     icon = "🚀",
                     name = "Space Station",
                     description = "+1 power for each Emoji in other locations."
-                ),
+                ), /* Volcano temporarily disabled.
                 Location(
                     icon = "🌋",
                     name = "Volcano",
                     description = "Destroy the three weakest Emojis at the end of the game."
-                ),
+                ), */
                 Location(
                     icon = "🏟️",
                     name = "Arena",
