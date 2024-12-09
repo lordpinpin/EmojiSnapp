@@ -11,6 +11,7 @@ import com.google.firebase.database.IgnoreExtraProperties
 import com.google.firebase.database.MutableData
 import com.google.firebase.database.Transaction
 import com.google.firebase.database.getValue
+import com.google.gson.Gson
 
 @IgnoreExtraProperties
 class MatchmakerDocument(val requests: ArrayList<MatchmakerEntry> = ArrayList<MatchmakerEntry>()) {
@@ -21,7 +22,7 @@ class Matchmaker {
         private val instance = FirebaseDatabase.getInstance("https://mco3-7e1e6-default-rtdb.asia-southeast1.firebasedatabase.app/")
         private val database: DatabaseReference = instance.getReference("matchmaking")
 
-        fun getMatch(onMatchFound: (String) -> Unit, onError: () -> Unit) {
+        fun getMatch(onMatchFound: (String, MessageParsed?) -> Unit, onError: () -> Unit) {
             if(currentUser?.uid == null) {
                 onError()
                 return
@@ -38,7 +39,7 @@ class Matchmaker {
                     }
 
                     if(myPlayerEntry == null) {
-                        doc.requests.add(MatchmakerEntry(currentUser.uid, null, Message(), false))
+                        doc.requests.add(MatchmakerEntry(currentUser.uid, null, "", false))
                     }
 
                     currentData.value = doc
@@ -103,7 +104,13 @@ class Matchmaker {
                         }
 
                         if(myPlayerEntry?.opp != null) {
-                            onMatchFound(myPlayerEntry.opp!!)
+                            var parsed : MessageParsed? = null
+                            try {
+                                parsed = Gson().fromJson(myPlayerEntry?.emojiMessage, MessageParsed::class.java)
+                            } catch (e: Exception) {
+
+                            }
+                            onMatchFound(myPlayerEntry.opp!!, parsed)
                             return
                         }
 

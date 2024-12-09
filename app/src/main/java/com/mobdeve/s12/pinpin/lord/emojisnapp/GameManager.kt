@@ -29,6 +29,8 @@ class GameManager (
     private val onOpponentTurnComplete : () -> Unit
 )
 {
+    private lateinit var fleedGame: () -> Unit
+    private lateinit var revealMoves: () -> Unit
     private val instance = FirebaseDatabase.getInstance("https://mco3-7e1e6-default-rtdb.asia-southeast1.firebasedatabase.app/")
     private val database: DatabaseReference = instance.getReference("TODO_CHANGE_THIS")
     private val tieBreakerRef = database.child("tieBreakerResult")
@@ -64,10 +66,25 @@ class GameManager (
 
     init {
         if(!againstBot) run {
-            Matchmaker.getMatch({ opponentUid ->
+            Matchmaker.getMatch({ opponentUid, prevState ->
                 playerName = Firebase.auth.currentUser?.uid ?: "Unknown UID"
                 oppName = opponentUid
+                fromUs = prevState
                 Log.d("Match", "Opponent found: $oppName")
+                MessageListener.onMessage(oppName, { messageParsed, isFlee ->
+                    if(fromOpp == null || fromOpp!!.version != messageParsed.version) {
+                        fromOpp = messageParsed
+                        gameTurn.opponentEmojisPlaced = messageParsed.emojisPlaced
+                    }
+
+                    Log.e("DBG", (fromOpp?.version.toString()) + fromUs?.version)
+                    if(isFlee) {
+                        // opponent fleed
+                        fleedGame()
+                    } else if(fromOpp?.version == fromUs?.version) {
+                        revealMoves()
+                    }
+                })
             }, {
                 Log.e("Match", "Failed to find opponent. Defaulting to bot match.")
                 againstBot = true
@@ -167,23 +184,20 @@ class GameManager (
         gameTurn.resetTurn()
     }
 
+    private var fromOpp: MessageParsed? = null
+    private var fromUs: MessageParsed? = null
     fun endTurn(): Boolean {
         if (againstBot) {
             // available immediately
-
+            revealMoves()
         } else {
-            //TODO: Wait for opponent endTurn
-            //TODO: Send Player moves to opponent
-            //TODO: Recieve opp moves
-
-            //TODO: Check if opponent retreated
-            if (false){ // Replace with opponent flee check
-                return true
+            //Send Player moves to opponent
+            if(fromUs == null) {
+                fromUs = MessageParsed(gameTurn.playerEmojisPlaced, 0)
+            } else {
+                fromUs = MessageParsed(gameTurn.playerEmojisPlaced, fromUs!!.version + 1)
             }
-
-            //TODO: Send to opponent if you ante'd
-            //TODO: Check if opponent ante'd
-            //TODo: Add opp moves to GameTurn.
+            MessageListener.send(oppName, fromUs!!)
         }
 
         return false
@@ -985,6 +999,11 @@ class GameManager (
         } else {
             gameTurn.removeOppMove(move)
         }
+    }
+
+    fun setOnOppMessageListener(fleedGame: () -> Unit, revealMoves: () -> Unit) {
+        this.fleedGame = fleedGame
+        this.revealMoves = revealMoves
     }
 
 

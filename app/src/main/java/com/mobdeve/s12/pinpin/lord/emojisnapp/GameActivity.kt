@@ -46,68 +46,12 @@ class GameActivity : AppCompatActivity()  {
         // Get the user type (bot or not)
         val isBotGame = intent.getBooleanExtra("IS_BOT_GAME", true)
 
-        // Get Firebase reference to current decks
-        val decksReference = FirebaseDatabase.getInstance().getReference("currentDecksChosen")
-        val currentUserUid = Firebase.auth.currentUser?.uid
+        // TODO: LOAD DECKS
+        var userDeck = Deck("Basic Deck", DataGenerator.loadActiveBasicData());
+        var opponentDeck = Deck("Alternative Deck", DataGenerator.loadActiveAlternativeData());
 
-        if (currentUserUid != null) {
-            // Fetch user's saved deck
-            decksReference.child(currentUserUid).get().addOnSuccessListener { snapshot ->
-                val savedDeckJson = snapshot.getValue(String::class.java) // Deck stored as JSON
-                val userDeck = if (savedDeckJson != null) {
-                    Gson().fromJson(savedDeckJson, Deck::class.java)
-                } else {
-                    // Use a dummy deck if no saved deck found
-                    Deck("Basic Deck", DataGenerator.loadActiveBasicData())
-                }
+        gameManager = GameManager(userDeck, opponentDeck, isBotGame) {
 
-                // Determine opponent deck if the game is not against a bot
-                val opponentDeck = if (!isBotGame) {
-                    // Fetch opponent's saved deck (assuming the opponent's UID is passed as an extra)
-                    val opponentUid = intent.getStringExtra("OPPONENT_UID")
-
-                    if (opponentUid != null) {
-                        decksReference.child(opponentUid).get().addOnSuccessListener { opponentSnapshot ->
-                            val opponentDeckJson = opponentSnapshot.getValue(String::class.java)
-                            val opponentDeck = if (opponentDeckJson != null) {
-                                // Deserialize the opponent's saved deck JSON to a Deck object
-                                Gson().fromJson(opponentDeckJson, Deck::class.java)
-                            } else {
-                                // Use a dummy deck for the opponent if no saved deck found
-                                Deck("Alternative Deck", DataGenerator.loadActiveAlternativeData())
-                            }
-
-                            // Initialize the game manager with the fetched decks
-                            gameManager = GameManager(userDeck, opponentDeck, isBotGame) {
-                                // hack to make this render later
-                                runOnUiThread {
-                                    revealMoves()
-                                }
-                            }
-
-                        }.addOnFailureListener {
-                            // Handle any failure in fetching opponent's deck
-                            Log.e("GameActivity", "Error fetching opponent's deck: ${it.message}")
-                        }
-                    }
-                    // Return an empty deck for now if no opponent UID is provided
-                    Deck("Alternative Deck", DataGenerator.loadActiveAlternativeData())
-                } else {
-                    // Use a dummy deck for bot game
-                    Deck("Alternative Deck", DataGenerator.loadActiveAlternativeData())
-                }
-
-                // Initialize the game manager after the decks are determined
-                gameManager = GameManager(userDeck, opponentDeck, isBotGame) {
-                    // hack to make this render later
-                    runOnUiThread {
-                        revealMoves()
-                    }
-                }
-            }.addOnFailureListener {
-                // Handle any failure in fetching user's deck
-                Log.e("GameActivity", "Error fetching user's deck: ${it.message}")
-            }
         }
 
         binding.snapTx.setOnClickListener {
@@ -146,12 +90,12 @@ class GameActivity : AppCompatActivity()  {
         }
 
         binding.endBtn.setOnClickListener {
-            var oppRetreat = gameManager.endTurn()
-            if(oppRetreat){
+            gameManager.setOnOppMessageListener({
                 fleedGame()
-            } else {
+            }, {
                 revealMoves()
-            }
+            })
+            gameManager.endTurn()
         }
 
         binding.escBtn.setOnClickListener {
@@ -159,8 +103,6 @@ class GameActivity : AppCompatActivity()  {
         }
 
         startNewTurn()
-
-
     }
 
     private fun startNewTurn() {

@@ -69,7 +69,7 @@ class WaitActivity : AppCompatActivity() {
     }
 
     fun tryFind() {
-        Matchmaker.getMatch({ uid ->
+        Matchmaker.getMatch({ uid, ign ->
             val intent = Intent(this, GameActivity::class.java)
             intent.putExtra("IS_BOT_GAME", false)
             startActivity(intent)
