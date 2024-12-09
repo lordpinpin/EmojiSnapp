@@ -380,21 +380,6 @@ class GameManager (
                             e.activeEffects["Dragon"] = true
                         }
                     }
-                    "Angel Face" -> {
-                        // Rainbow: All your other Emojis gain +1 power.
-                        val allOtherEmojis = mutableListOf<Emoji>()
-
-                        // Loop through all locations
-                        locations.forEachIndexed { index, _ ->
-                            val otherEmojis = playerEmojisInLocations[index]
-                            allOtherEmojis.addAll(otherEmojis)
-                        }
-
-                        // Now, iterate over all the other emojis and apply the Rainbow effect
-                        allOtherEmojis.forEach { e ->
-                            e.activeEffects["Angel Face"] = true
-                        }
-                    }
                 }
             }
         }
@@ -461,21 +446,6 @@ class GameManager (
                         val opposingList = playerEmojisInLocations[index]
                         opposingList.forEach { e ->
                             e.activeEffects["Dragon"] = true
-                        }
-                    }
-                    "Angel Face" -> {
-                        // Rainbow: All your other Emojis gain +1 power.
-                        val allOtherEmojis = mutableListOf<Emoji>()
-
-                        // Loop through all locations
-                        locations.forEachIndexed { index, _ ->
-                            val otherEmojis = oppEmojisInLocations[index]
-                            allOtherEmojis.addAll(otherEmojis)
-                        }
-
-                        // Now, iterate over all the other emojis and apply the Rainbow effect
-                        allOtherEmojis.forEach { e ->
-                            e.activeEffects["Angel Face"] = true
                         }
                     }
                 }
