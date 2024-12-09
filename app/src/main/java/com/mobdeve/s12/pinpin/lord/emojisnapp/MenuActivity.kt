@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.gson.Gson
@@ -14,7 +15,7 @@ import com.mobdeve.s12.pinpin.lord.emojisnapp.databinding.ActivityMenuBinding
 class MenuActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMenuBinding
-
+    private val user = FirebaseAuth.getInstance().currentUser;
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -54,7 +55,7 @@ class MenuActivity : AppCompatActivity() {
         // Configure the screen based on the user type
         if (userType == "LOGIN") {
             // Do something specific for logged-in users
-            binding.welcomeTx.text = "Welcome back, User! \uD83D\uDE0A"
+            binding.welcomeTx.text = "Welcome back, ${user?.email ?: "User"}! \uD83D\uDE0A"
         } else if (userType == "GUEST") {
             // Do something specific for guest users
             binding.welcomeTx.text = "Welcome, Guest! \uD83D\uDE0A"

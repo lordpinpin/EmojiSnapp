@@ -63,7 +63,7 @@ class Matchmaker {
                     val doc = docFromDb ?: MatchmakerDocument()
 
                     val myPlayerEntry = doc.requests.find {
-                        it.user == currentUser.uid
+                        it.user == currentUser.uid && it.isOver == false
                     }
                     if(myPlayerEntry?.opp != null) {
                         // someone already matched with us
@@ -71,7 +71,7 @@ class Matchmaker {
                     }
 
                     val matchedPlayerEntry = doc.requests.find {
-                        it.user != currentUser.uid && it.opp == null;
+                        it.user != currentUser.uid && it.opp == null && it.isOver == false;
                     }
 
                     if(myPlayerEntry != null && matchedPlayerEntry != null) {
