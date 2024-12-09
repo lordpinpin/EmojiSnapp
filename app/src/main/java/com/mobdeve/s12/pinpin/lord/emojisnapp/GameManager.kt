@@ -29,8 +29,8 @@ class GameManager (
     private val onOpponentTurnComplete : () -> Unit
 )
 {
-    private lateinit var fleedGame: () -> Unit
-    private lateinit var revealMoves: () -> Unit
+    private var fleedGame: (() -> Unit)? = null
+    private var revealMoves: (() -> Unit)? = null
     private val instance = FirebaseDatabase.getInstance("https://mco3-7e1e6-default-rtdb.asia-southeast1.firebasedatabase.app/")
     private val database: DatabaseReference = instance.getReference("TODO_CHANGE_THIS")
     private val tieBreakerRef = database.child("tieBreakerResult")
@@ -74,7 +74,7 @@ class GameManager (
                     if(isFlee) {
                         // opponent fleed
                         MessageListener.endGameOfOpp(oppName)
-                        fleedGame()
+                        fleedGame?.let { it() }
                         return@onMessage;
                     }
 
@@ -91,7 +91,7 @@ class GameManager (
                     Log.e("DBG2", isFlee.toString())
 
                     if(fromOpp?.version == fromUs?.version) {
-                        revealMoves()
+                        revealMoves?.let { it() }
                     }
                 })
             }, {
@@ -198,7 +198,7 @@ class GameManager (
     fun endTurn(): Boolean {
         if (againstBot) {
             // available immediately
-            revealMoves()
+            revealMoves?.let { it() }
         } else {
             //Send Player moves to opponent
             if(fromUs == null) {

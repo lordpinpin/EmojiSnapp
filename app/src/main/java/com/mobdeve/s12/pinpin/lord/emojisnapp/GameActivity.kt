@@ -53,6 +53,11 @@ class GameActivity : AppCompatActivity()  {
         gameManager = GameManager(userDeck, opponentDeck, isBotGame) {
 
         }
+        gameManager.setOnOppMessageListener({
+            fleedGame()
+        }, {
+            revealMoves()
+        })
 
         binding.snapTx.setOnClickListener {
             if(gameManager.ante()){
@@ -90,11 +95,6 @@ class GameActivity : AppCompatActivity()  {
         }
 
         binding.endBtn.setOnClickListener {
-            gameManager.setOnOppMessageListener({
-                fleedGame()
-            }, {
-                revealMoves()
-            })
             gameManager.endTurn()
         }
 
