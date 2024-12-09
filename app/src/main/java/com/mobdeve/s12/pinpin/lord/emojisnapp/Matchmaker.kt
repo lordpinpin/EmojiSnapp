@@ -38,7 +38,7 @@ class Matchmaker {
                     }
 
                     if(myPlayerEntry == null) {
-                        doc.requests.add(MatchmakerEntry(currentUser.uid, null, false))
+                        doc.requests.add(MatchmakerEntry(currentUser.uid, null, Message(), false))
                     }
 
                     currentData.value = doc
