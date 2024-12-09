@@ -98,4 +98,16 @@ data class Emoji(
 
     }
 
+    // Override equals based on the `name`
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true // Same reference
+        if (other !is Emoji) return false // Not an Emoji
+        return this.name == other.name // Equality based on `name`
+    }
+
+    // Override hashCode to be consistent with equals
+    override fun hashCode(): Int {
+        return name.hashCode()
+    }
+
 }

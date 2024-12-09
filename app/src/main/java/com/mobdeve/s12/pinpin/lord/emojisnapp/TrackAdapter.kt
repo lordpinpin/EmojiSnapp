@@ -23,17 +23,6 @@ class TrackAdapter(
     private val ITEM_TYPE_LEFT = 0
     private val ITEM_TYPE_RIGHT = 1
 
-    private var currentPitch: Float = 0f
-    private var currentRoll: Float = 0f
-
-    // Function to update tilt angles from the sensor
-    fun updateTiltAngles(pitch: Float, roll: Float) {
-        // Clamp the values before updating
-        currentPitch = pitch
-        currentRoll = roll
-
-        notifyItemRangeChanged(0, itemCount)
-    }
 
     override fun getItemViewType(position: Int): Int {
         // Alternate between left and right items
@@ -56,12 +45,12 @@ class TrackAdapter(
             var req = position * 5
             var cur_progress = overall_progress - req
             cur_progress = minOf(cur_progress, 5)
-            holder.bind(emoji, cur_progress, req, currentPitch, currentRoll)
+            holder.bind(emoji, cur_progress, req)
         } else if (holder is EmojiViewHolderRight) {
             var req = position * 5
             var cur_progress = overall_progress - req
             cur_progress = minOf(cur_progress, 5)
-            holder.bind(emoji, cur_progress, req, currentPitch, currentRoll)
+            holder.bind(emoji, cur_progress, req)
         }
     }
 
@@ -72,7 +61,7 @@ class TrackAdapter(
 
     // ViewHolder for Left-Aligned Emoji
     class EmojiViewHolderLeft(private val binding: LeftTrackBinding, private val context: Context) : RecyclerView.ViewHolder(binding.root)  {
-        fun bind(emoji: Emoji, progress: Int, req: Int, pitch: Float, roll: Float) {
+        fun bind(emoji: Emoji, progress: Int, req: Int) {
             binding.leftEmojiTx.text = emoji.icon
             binding.leftNameTx.text = emoji.name
             binding.leftCostTx.text = emoji.baseCost.toString()
@@ -92,10 +81,6 @@ class TrackAdapter(
                 showEmojiDetailsDialog(emoji)
             }
 
-            // Apply tilt (pitch and roll) transformation
-            binding.leftEmojiTx.rotationX = pitch / 2
-            binding.leftEmojiTx.rotationY = roll / 2
-
             // Create a ColorFilter using the ColorMatrix
             val colorFilter = ColorMatrixColorFilter(colorMatrix)
 
@@ -105,10 +90,6 @@ class TrackAdapter(
             binding.leftPowerTx.paint.colorFilter = colorFilter
             binding.leftReqTx.paint.colorFilter = colorFilter
 
-            // Ensure the TextView is invalidated to refresh the appearance
-            binding.leftEmojiTx.invalidate()
-            binding.leftCostTx.invalidate()
-            binding.leftPowerTx.invalidate()
         }
 
         private fun showEmojiDetailsDialog(emoji: Emoji) {
@@ -136,7 +117,7 @@ class TrackAdapter(
 
     // ViewHolder for Right-Aligned Emoji
     class EmojiViewHolderRight(private val binding: RightTrackBinding, private val context: Context) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(emoji: Emoji, progress: Int, req: Int, pitch: Float, roll: Float) {
+        fun bind(emoji: Emoji, progress: Int, req: Int) {
             binding.rightEmojiTx.text = emoji.icon
             binding.rightNameTx.text = emoji.name
             binding.rightCostTx.text = emoji.baseCost.toString()
@@ -156,9 +137,6 @@ class TrackAdapter(
                 showEmojiDetailsDialog(emoji)
             }
 
-            binding.rightEmojiTx.rotationX = pitch / 2
-            binding.rightEmojiTx.rotationY = roll / 2
-
             // Create a ColorFilter using the ColorMatrix
             val colorFilter = ColorMatrixColorFilter(colorMatrix)
 
@@ -168,10 +146,6 @@ class TrackAdapter(
             binding.rightPowerTx.paint.colorFilter = colorFilter
             binding.rightReqTx.paint.colorFilter = colorFilter
 
-            // Ensure the TextView is invalidated to refresh the appearance
-            binding.rightEmojiTx.invalidate()
-            binding.rightCostTx.invalidate()
-            binding.rightPowerTx.invalidate()
         }
 
         private fun showEmojiDetailsDialog(emoji: Emoji) {
