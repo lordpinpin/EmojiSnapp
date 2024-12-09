@@ -173,6 +173,37 @@ class DataGenerator {
             return selectedLocations
         }
 
+        fun loadSpecificFiveLocations(): ArrayList<Location> {
+            val specificLocations = arrayListOf(
+                Location(
+                    icon = "🚯",
+                    name = "Dumpster",
+                    description = "Emojis here have -3 power."
+                ),
+                Location(
+                    icon = "🏔️",
+                    name = "Mountain",
+                    description = "Emojis with less than 4 power cannot be played here."
+                ),
+                Location(
+                    icon = "📄",
+                    name = "Blank Page",
+                    description = "No effect."
+                ),
+                Location(
+                    icon = "🏰",
+                    name = "Castle",
+                    description = "All Emojis here gain +2 power."
+                ),
+                Location(
+                    icon = "🚀",
+                    name = "Space Station",
+                    description = "+1 power for each Emoji in other locations."
+                )
+            )
+            return specificLocations
+        }
+
         fun loadVolcanoes(): List<Location> {
             val volcanoes = arrayListOf(
                 Location(

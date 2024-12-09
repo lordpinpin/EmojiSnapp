@@ -48,7 +48,7 @@ class GameManager (
     private var oppName = ""
 
     // Game state variables
-    private val locations: List<Location> = DataGenerator.loadLocations(true)
+    private val locations: List<Location> = DataGenerator.loadSpecificFiveLocations()
     private var gameTurn = GameTurn()
     private var myGameTurnUuid = UUID.randomUUID().toString()
     var currentTurn = 0
